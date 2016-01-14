@@ -104,13 +104,13 @@ setup(
         'Topic :: Software Development :: User Interfaces',
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 1 - Planning',
         'License :: OSI Approved :: Apache Software License',
         'License :: Other/Proprietary License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: Implementation :: CPython'
+        'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
         ],
     install_requires=[
