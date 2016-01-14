@@ -1,0 +1,5 @@
+cffi
+future
+PyOpenGL
+glfw-cffi
+numpy
