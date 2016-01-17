@@ -19,9 +19,10 @@ Usage:
     >>> fshader = open('shader.frag', 'r').read()
     >>> program = oogli.create_program(vshader, fshader)
     >>> triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
-    >>> while (not win.should_close()):  # ctrl+c to break
-    ...     program.draw(position=triangle)  # renders triangle
-    ...     oogli.cycle()  # handles events and swapping
+    >>> with oogli.create_window() as win:
+    ...     while win.is_open():  # ctrl+c to break
+    ...         program.draw(position=triangle)  # renders triangle
+    ...         oogli.cycle()  # handles events and swapping
     ...
 
 
@@ -48,3 +49,34 @@ __license__ = 'Apache 2.0'
 __copyright__ = 'Copyright 2016 Brian Bruggeman'
 __url__ = 'https://github.com/brianbruggeman/oogli.git'
 __shortdesc__ = 'Oogli is a beautiful object oriented graphics library interface'
+
+
+###############################################################################
+import atexit
+
+import glfw
+
+from .Program import Program
+from .Window import Window
+
+
+def create_program(v_shader, f_shader):
+    assert glfw.core.init() != 0
+    program = Program(v_shader, f_shader)
+    program.build()
+    return program
+
+
+def create_window(title='Example', width=800, height=600, *args, **kwds):
+    assert glfw.core.init() != 0
+    win = Window(title=title, width=width, height=height, *args, **kwds)
+    return win
+
+
+def cycle():
+    assert glfw.core.init() != 0
+    glfw.core.swap_buffers()
+    glfw.core.poll_events()
+
+
+atexit.register(glfw.core.terminate)
