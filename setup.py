@@ -96,7 +96,7 @@ setup(
     url=data.get('url'),
     keywords='GLFW, CFFI',
     packages=[package_name],
-    package_data={'': ['*.h']},
+    package_data={},
     classifiers=[
         'Topic :: Multimedia :: Graphics',
         'Topic :: Multimedia :: Graphics :: 3D Rendering',
@@ -114,7 +114,8 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy'
         ],
     install_requires=[
-        'cffi', 'pyopengl', 'docopt', 'freetype-py', 'numpy'
+        'glfw-cffi',
+        'numpy'
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
