@@ -50,7 +50,6 @@ __copyright__ = 'Copyright 2016 Brian Bruggeman'
 __url__ = 'https://github.com/brianbruggeman/oogli.git'
 __shortdesc__ = 'Oogli is a beautiful object oriented graphics library interface'
 
-
 ###############################################################################
 import atexit
 
@@ -67,7 +66,7 @@ def create_program(v_shader, f_shader):
     return program
 
 
-def create_window(title='Example', width=800, height=600, *args, **kwds):
+def create_window(title='Oogli', width=800, height=600, *args, **kwds):
     assert glfw.core.init() != 0
     win = Window(title=title, width=width, height=height, *args, **kwds)
     return win

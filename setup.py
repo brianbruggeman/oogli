@@ -104,7 +104,7 @@ setup(
         'Topic :: Software Development :: User Interfaces',
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
-        'Development Status :: 1 - Planning',
+        'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: Apache Software License',
         'License :: Other/Proprietary License',
         'Operating System :: OS Independent',
