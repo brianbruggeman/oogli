@@ -92,7 +92,7 @@ class Program(object):
             try:
                 self.build()
             except RuntimeError as e:
-                print 'Build failed: {}'.format(self)
+                print('Build failed: {}'.format(self))
                 for arg in e.args:
                     print arg
             self.built = True
