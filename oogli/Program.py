@@ -94,7 +94,7 @@ class Program(object):
             except RuntimeError as e:
                 print('Build failed: {}'.format(self))
                 for arg in e.args:
-                    print arg
+                    print(arg)
             self.built = True
         if not self.loaded:
             self.loaded = True
