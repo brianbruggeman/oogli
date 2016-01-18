@@ -1,15 +1,6 @@
 sudo: required
 language: python
 dist: trusty
-python: 2.7
-env:
-  matrix:
-    - TOXENV=py27
-    - TOXENV=py35
-    - TOXENV=pypy
-    - TOXENV=py35-nightly
-    - TOXENV=py36
-
 python:
     - "pypy"
     - "2.6"
@@ -60,6 +51,7 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 
 install:
+   - pip install tox-travis
    - pip install tox
    - pip install -e .
 
