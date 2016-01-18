@@ -1,12 +1,20 @@
 sudo: required
 language: python
-dist: trusty  # wily
-python:
-    - "2.7"
-    - "3.5"
-    - "3.5-dev" # 3.5 development branch
-    - "nightly" # currently points to 3.6-dev
-    - "pypy"
+dist: trusty
+env:
+  matrix:
+    - TOXENV=py27
+    - TOXENV=py35
+    - TOXENV=pypy
+    - TOXENV=py35-nightly
+    - TOXENV=py36
+
+# python:
+#     - "2.7"
+#     - "3.5"
+#     - "3.5-dev" # 3.5 development branch
+#     - "nightly" # currently points to 3.6-dev
+#     - "pypy"
 branches:
     only:
         - master
@@ -46,6 +54,7 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 
 install:
+   - pip install tox
    - pip install -e .
 
 before_script:
@@ -59,7 +68,7 @@ before_script:
 # command to run tests
 script:
    # Run each separately so we have an idea of what's broken in travis
-   - py.test -s
+   - tox -e $TOXENV
 
 after_success:
    - coveralls

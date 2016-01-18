@@ -50,7 +50,7 @@ class Window(object):
         fb_width, fb_height = glfw.get_framebuffer_size(self.win)
         return fb_height
 
-    def __init__(self, title='GLFW Example', height=480, width=640, major=None, minor=None):
+    def __init__(self, title='GLFW Example', height=480, width=640, major=None, minor=None, visible=True, focus=True):
         # Determine available major/minor compatibility
         #  This contains init and terminate logic for glfw, so it must be run first
         major, minor = self.get_opengl_version(major, minor)
@@ -68,6 +68,8 @@ class Window(object):
         glfw.core.window_hint(glfw.CONTEXT_VERSION_MINOR, minor)
         glfw.core.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
         glfw.core.window_hint(glfw.OPENGL_FORWARD_COMPAT, gl.TRUE)
+        glfw.core.window_hint(glfw.VISIBLE, visible)
+        glfw.core.window_hint(glfw.FOCUSED, focus)
 
         # Generate window
         self.win = glfw.create_window(height=height, width=width, title=title)
@@ -121,7 +123,7 @@ class Window(object):
                 glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, minor)
                 glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
                 glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, gl.GL_TRUE)
-                glfw.window_hint(glfw.VISIBLE, gl.GL_FALSE)
+                glfw.window_hint(glfw.VISIBLE, False)
                 window = glfw.core.create_window(1, 1, title, ffi.NULL, ffi.NULL)
                 if window != ffi.NULL:
                     glfw.destroy_window(window)
@@ -138,6 +140,29 @@ class Window(object):
     def init(self):
         '''Scene initialization'''
         gl.clear(gl.COLOR_BUFFER_BIT)
+
+    @property
+    def visible(self):
+        return glfw.get_window_attrib(self.win, glfw.VISIBLE)
+
+    @visible.setter
+    def visible(self, value):
+        if value in [True, gl.TRUE, ]:
+            glfw.show_window(self.win)
+        elif value in [False, gl.FALSE]:
+            glfw.hide_window(self.win)
+        return self._visible
+
+    @property
+    def focus(self):
+        return glfw.get_window_attrib(self.win, glfw.FOCUSED)
+
+    @focus.setter
+    def focus(self, value):
+        if value in [True, False, gl.TRUE, gl.FALSE]:
+            self._focus = value
+            glfw.window_hint(glfw.FOCUS, self._focus)
+        return self._focus
 
     def render(self):
         '''Empty scene'''
@@ -181,8 +206,13 @@ class Window(object):
         glfw.core.set_monitor_callback(self.on_monitor)
 
     @property
-    def is_open(self):
+    def open(self):
         return not glfw.core.window_should_close(self.win)
+
+    @open.setter
+    def open(self, value):
+        if value in [True, gl.TRUE]:
+            glfw.core.set_window_should_close(value)
 
     @staticmethod
     @glfw.decorators.char_callback

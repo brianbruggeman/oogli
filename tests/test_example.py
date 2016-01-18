@@ -25,15 +25,23 @@ def test_example():
     # Create a program from the shaders
     #  Note: This will auto request an OpenGL context of 4.1
     program = oogli.Program(v_shader, f_shader)
+    version = major, minor = program.version
+    print('Opengl: {}'.format(version))
 
     # Vertices for a 2D Triangle
     triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
 
-    with oogli.Window('Oogli', 640, 480) as win:
+    with oogli.Window(title='Oogli',
+                      width=640, height=480,
+                      major=major, minor=minor,
+                      focus=False, visible=False) as win:
         # Main Loop
-        while win.open:
+        # Setup window in a 'debug' mode
+        count = 0
+        while win.open is True or count <= 10:
             # Render triangle
             program.draw(vertices=triangle)
+            count += 1
 
 
 if __name__ == '__main__':

@@ -39,6 +39,12 @@ additionally follow these three criteria:
     your changes upstream, you'll submit a change request.  While this
     criteria is completely optional, please consider not being a dick.
 '''
+import atexit
+
+import glfw
+
+from .Program import Program
+from .Window import Window
 
 ###############################################################################
 __title__ = 'oogli'
@@ -50,15 +56,8 @@ __copyright__ = 'Copyright 2016 Brian Bruggeman'
 __url__ = 'https://github.com/brianbruggeman/oogli.git'
 __shortdesc__ = 'Oogli is a beautiful object oriented graphics library interface'
 
+
 ###############################################################################
-import atexit
-
-import glfw
-
-from .Program import Program
-from .Window import Window
-
-
 def create_program(v_shader, f_shader):
     assert glfw.core.init() != 0
     program = Program(v_shader, f_shader)
@@ -78,4 +77,5 @@ def cycle():
     glfw.core.poll_events()
 
 
+###############################################################################
 atexit.register(glfw.core.terminate)
