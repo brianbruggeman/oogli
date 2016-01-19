@@ -36,7 +36,7 @@ def test_example():
                       major=major, minor=minor,
                       focus=False, visible=False) as win:
         # Main Loop
-        # Setup window in a 'debug' mode
+        # Loop through only 10 times -- arbitrary
         count = 0
         while win.open is True or count <= 10:
             # Render triangle
