@@ -38,10 +38,15 @@ def test_example():
         # Main Loop
         # Setup window in a 'debug' mode
         count = 0
-        while win.open is True or count <= 10:
+        running = True
+        while running:
             # Render triangle
             program.draw(vertices=triangle)
             count += 1
+            if win.open is False:
+                running = False
+            elif count > 10:
+                running = False
 
 
 if __name__ == '__main__':
