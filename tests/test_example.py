@@ -18,7 +18,7 @@ def test_example():
         #version 410
         out vec4 frag_color;
         void main () {
-            frag_colour = vec4(0.3, 1.0, 0.3, 1.0);
+            frag_color = vec4(0.3, 1.0, 0.3, 1.0);
         }
     '''
 
@@ -38,10 +38,15 @@ def test_example():
         # Main Loop
         # Loop through only 10 times -- arbitrary
         count = 0
-        while win.open is True or count <= 10:
+        running = True
+        while running:
             # Render triangle
             program.draw(vertices=triangle)
             count += 1
+            if win.open is False:
+                running = False
+            elif count > 10:
+                running = False
 
 
 if __name__ == '__main__':
