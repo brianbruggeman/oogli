@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 import re
+from textwrap import dedent as dd
 
 import glfw
 from glfw import gl
@@ -13,9 +14,13 @@ class Shader(object):
     def __init__(self, source):
         assert glfw.core.init(), 'Error: GLFW could not be initialized'
         self.bound_attributes = OrderedDict()
-        self.source = source
+        self.source = dd('\n'.join([l for l in source.split('\n') if l.strip()]))
         self.parse(source)
         self.compiled = False
+
+    @property
+    def vars(self):
+        return self.bound_attributes
 
     @property
     def shader(self):
@@ -24,11 +29,14 @@ class Shader(object):
         return self._id
 
     def compile(self):
-        gl.shader_source(self.shader, self.source)
-        result = gl.get_shaderiv(self.shader, gl.COMPILE_STATUS)
-        log_length = gl.get_shaderiv(self.shader, gl.INFO_LOG_LENGTH)
-        assert result == 0 and log_length == 0, gl.get_shader_info_log(self.shader)
-        self.compiled = True
+        '''Compiles and checks output'''
+        if not self.compiled:
+            gl.shader_source(self.shader, self.source)
+            gl.compile_shader(self.shader)
+            result = gl.get_shaderiv(self.shader, gl.COMPILE_STATUS)
+            log_length = gl.get_shaderiv(self.shader, gl.INFO_LOG_LENGTH)
+            assert result == gl.TRUE and log_length == 0, gl.get_shader_info_log(self.shader)
+            return self.shader
 
     def attach(self, program):
         if not self.compiled:
@@ -42,10 +50,12 @@ class Shader(object):
     def delete(self):
         if self.shader is not None:
             gl.delete_shader(self.shader)
-            self.shader = None
 
     def cleanup(self, program):
         self.detach(program)
+        self.delete()
+
+    def __del__(self):
         self.delete()
 
     def __contains__(self, key):
@@ -93,8 +103,8 @@ class Shader(object):
             if inputs_eng.search(line):
                 data = [m.groupdict() for m in inputs_eng.finditer(line)][0]
                 varname = data['varname']
-                vartype = 'var' if data['vartype'] != 'uniform' else 'uniform'
-                setattr(self, varname, None)
+                vartype = data['vartype']
+                setattr(self, varname, vartype)
                 self.bound_attributes[varname] = vartype
         self.set_context(self.version)
 

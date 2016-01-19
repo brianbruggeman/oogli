@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import ctypes
+from collections import OrderedDict
 
 from glfw import gl
 import numpy as np
@@ -29,11 +30,12 @@ class Program(object):
     def __init__(self, vert=None, frag=None, geo=None, tc=None, te=None):
         self.vert = VertexShader(vert) if vert is not None else None
         self.frag = FragmentShader(frag) if frag is not None else None
-        self.geo = GeometryShader(geo) if geo is not None else None
         self.tc = TessellationControlShader(tc) if tc is not None else None
         self.te = TessellationEvaluationShader(te) if te is not None else None
+        self.geo = GeometryShader(geo) if geo is not None else None
         self.loaded = False
         self.built = False
+        self.bound_attributes = OrderedDict()
 
     @property
     def program(self):
@@ -54,22 +56,22 @@ class Program(object):
             self.vert = shader
         elif isinstance(shader, FragmentShader):
             self.frag = shader
-        elif isinstance(shader, GeometryShader):
-            self.geo = shader
         elif isinstance(shader, TessellationControlShader):
             self.tc = shader
         elif isinstance(shader, TessellationEvaluationShader):
             self.te = shader
+        elif isinstance(shader, GeometryShader):
+            self.geo = shader
         shader.compile()
         shader.attach(self)
 
     def build(self):
         shaders = [
             shader
-            for shader in (self.vert, self.frag, self.geo, self.tc, self.te)
+            for shader in (self.vert, self.frag, self.tc, self.te, self.geo)
             if isinstance(shader, Shader)
         ]
-        error_message = 'Both a vertex and fragment shader must be provided'
+        error_message = 'Both a vertex and fragment shader must be provided.'
         assert len(shaders) >= 2, error_message
         assert self.vert is not None and self.frag is not None, error_message
         # Attach Shaders
@@ -81,11 +83,15 @@ class Program(object):
         # Check for errors
         result = gl.get_programiv(self.program, gl.LINK_STATUS)
         log_length = gl.get_programiv(self.program, gl.INFO_LOG_LENGTH)
-        assert result == 0 and log_length == 0, gl.get_program_info_log(self.program)
+        assert result == gl.TRUE and log_length == 0, gl.get_program_info_log(self.program)
+        self.bound_attributes = OrderedDict((k, v) for k, v in self.vert.bound_attributes.items())
         # Cleanup shaders
         for shader in shaders:
             if isinstance(shader, Shader):
                 shader.cleanup(program=self)
+        # Bind the attributes based on their index in bound_attributes
+        for index, varname in enumerate(self.bound_attributes):
+            gl.bind_attrib_location(self.program, index, varname)
 
     def load(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], **kwds):
         if not self.built:
@@ -127,10 +133,12 @@ class Program(object):
             for key, val in data.items():
                 self.buffer[key] = val
             if not indices:
-                indices = range(data_len)
-            if not isinstance(indices, np.ndarray):
-                indices = array(indices)
-            gl.buffer_data(gl.ELEMENT_ARRAY_BUFFER, indices.flatten(), gl.GL_STATIC_DRAW)
+                self.indices = range(data_len)
+            else:
+                self.indices = indices
+            if not isinstance(self.indices, np.ndarray):
+                self.indices = array(self.indices, vtype=np.uint32)
+            gl.buffer_data(gl.ELEMENT_ARRAY_BUFFER, self.indices.flatten(), gl.GL_STATIC_DRAW)
 
     def draw(self, **kwds):
         '''Converts list data into array data and binds numpy arrays to
@@ -146,7 +154,8 @@ class Program(object):
         gl.bind_vertex_array(self.vao)
         stride = self.buffer.strides[0]
         last_name = None
-        for varindex, varname, vartype in enumerate(self.vert.bound_attributes.items()):
+        for varindex, vardata in enumerate(self.bound_attributes.items()):
+            varname, vartype = vardata
             if vartype == 'uniform':
                 continue
             if last_name is None:
@@ -154,15 +163,21 @@ class Program(object):
                 last_name = varname
             else:
                 offset = ctypes.c_void_p(self.buffer.dtype[last_name].itemsize)
-            pos = gl.glGetAttribLocation(self.program, 'position')
-            gl.glEnableVertexAttribArray(pos)
-            gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.indices_buffer_id)
-            gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.buffer_id)
-            gl.glVertexAttribPointer(pos, self.buffer[varname].shape[-1], gl.GL_FLOAT, False, stride, offset)
+            gl.enable_vertex_attrib_array(varindex)
+            gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
+            gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)
+            gl.vertex_attrib_pointer(
+                varindex,
+                self.buffer[varname].shape[-1],
+                gl.GL_FLOAT,
+                False,
+                stride,
+                offset
+            )
 
     def __repr__(self):
         cname = self.__class__.__name__
         version = self.version
-        shaders = ', '.join(['{}'.format(s) for s in (self.vert, self.frag, self.geo, self.tc, self.te) if s])
+        shaders = ', '.join(['{}'.format(s) for s in (self.vert, self.frag, self.tc, self.te, self.geo) if s])
         string = '<{cname}{version} shaders=[{shaders}]>'.format(cname=cname, version=version, shaders=shaders)
         return string
