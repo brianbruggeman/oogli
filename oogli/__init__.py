@@ -87,18 +87,20 @@ def screenshot(pixels):
 
 def opengl_supported(major, minor):
     '''Determines if opengl is supported for the version provided'''
+    assert glfw.core.init() != 0
     version = (major, minor)
-    glfw.core.window_hint(glfw.FOCUSED, False)
     glfw.core.window_hint(glfw.CONTEXT_VERSION_MAJOR, major)
     glfw.core.window_hint(glfw.CONTEXT_VERSION_MINOR, minor)
     profile = glfw.OPENGL_ANY_PROFILE if version < (3, 2) else glfw.OPENGL_CORE_PROFILE
     glfw.core.window_hint(glfw.OPENGL_PROFILE, profile)
     # Setup forward compatibility if able
-    forward_compat = False if version < (3, 0) else True
+    forward_compat = gl.FALSE if version < (3, 0) else gl.TRUE
     glfw.core.window_hint(glfw.OPENGL_FORWARD_COMPAT, forward_compat)
     #  Keep the window invisible
-    glfw.core.window_hint(glfw.VISIBLE, False)
-    return glfw.create_window(title='test', width=1, height=1) != 0
+    glfw.core.window_hint(glfw.VISIBLE, gl.FALSE)
+    glfw.core.window_hint(glfw.FOCUSED, gl.FALSE)
+    win = glfw.create_window(title='test', width=1, height=1)
+    return win != None
 
 
 ###############################################################################
