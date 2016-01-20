@@ -71,6 +71,14 @@ class Window(object):
         glfw.core.window_hint(glfw.VISIBLE, visible)
         glfw.core.window_hint(glfw.FOCUSED, focus)
 
+        # Unnecessary
+        glfw.core.window_hint(glfw.SAMPLES, 1)
+        glfw.core.window_hint(glfw.RED_BITS, 8)
+        glfw.core.window_hint(glfw.GREEN_BITS, 8)
+        glfw.core.window_hint(glfw.BLUE_BITS, 8)
+        glfw.core.window_hint(glfw.ALPHA_BITS, 8)
+        glfw.core.window_hint(glfw.DEPTH_BITS, 8)
+
         # Generate window
         self.win = glfw.create_window(height=height, width=width, title=title)
         Window.registry[self.win] = self

@@ -141,7 +141,6 @@ class Program(object):
 
             gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)
             gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-
             gl.buffer_data(gl.ELEMENT_ARRAY_BUFFER, self.indices.flatten(), gl.GL_STATIC_DRAW)
 
     def draw(self, **kwds):
@@ -155,32 +154,42 @@ class Program(object):
         gl.enable(gl.DEPTH_TEST)
         gl.depth_func(gl.LESS)
         gl.use_program(self.program)
+
         gl.bind_vertex_array(self.vao)
         stride = self.buffer.strides[0]
-        last_varname = None
-        index_adjustment = 0
-        for varindex, vardata in enumerate(self.bound_attributes.items()):
-            varname, vartype = vardata
-            if vartype == 'uniform':
-                index_adjustment += 1
-                continue
-            if last_varname is None:
-                offset = ctypes.c_void_p(0)
-                last_varname = varname
-            else:
-                offset = ctypes.c_void_p(self.buffer.dtype[last_varname].itemsize)
-            varindex -= index_adjustment
-            gl.enable_vertex_attrib_array(varindex)
-            gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-            gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)
-            gl.vertex_attrib_pointer(
-                varindex,
-                self.buffer[varname].shape[-1],
-                gl.GL_FLOAT,
-                False,
-                stride,
-                offset
-            )
+        offset = ctypes.c_void_p(0)
+        vert = gl.glGetAttribLocation(self.program, 'vertices')
+        gl.glEnableVertexAttribArray(vert)
+        gl.glBindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
+        gl.glBindBuffer(gl.ARRAY_BUFFER, self.buffer_id)
+        gl.glVertexAttribPointer(vert, self.buffer['vertices'].shape[-1], gl.FLOAT, False, stride, offset)
+
+
+
+        # last_varname = None
+        # index_adjustment = 0
+        # for varindex, vardata in enumerate(self.bound_attributes.items()):
+        #     varname, vartype = vardata
+        #     if vartype == 'uniform':
+        #         index_adjustment += 1
+        #         continue
+        #     if last_varname is None:
+        #         offset = ctypes.c_void_p(0)
+        #         last_varname = varname
+        #     else:
+        #         offset = ctypes.c_void_p(self.buffer.dtype[last_varname].itemsize)
+        #     varindex -= index_adjustment
+        #     gl.enable_vertex_attrib_array(varindex)
+        #     gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
+        #     gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)
+        #     gl.vertex_attrib_pointer(
+        #         varindex,
+        #         self.buffer[varname].shape[-1],
+        #         gl.GL_FLOAT,
+        #         False,
+        #         stride,
+        #         offset
+        #     )
         gl.draw_elements(self.mode, len(self.indices), gl.GL_UNSIGNED_INT, None)
         gl.glDisableVertexAttribArray(self.vao)
 

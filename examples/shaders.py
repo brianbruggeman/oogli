@@ -21,28 +21,28 @@ draw_array = False
 use_data = True
 
 modes = sorted([
-    gl.GL_POINTS,
-    gl.GL_LINES,
-    gl.GL_LINE_LOOP,
-    gl.GL_LINE_STRIP,
-    gl.GL_LINES_ADJACENCY,
-    gl.GL_LINE_STRIP_ADJACENCY,
-    # gl.GL_QUADS,
-    gl.GL_TRIANGLES,
-    gl.GL_TRIANGLE_STRIP,
-    gl.GL_TRIANGLE_FAN,
-    gl.GL_TRIANGLE_STRIP_ADJACENCY,
-    gl.GL_TRIANGLES_ADJACENCY,
-    # gl.GL_PATCHES,
+    gl.POINTS,
+    gl.LINES,
+    gl.LINE_LOOP,
+    gl.LINE_STRIP,
+    gl.LINES_ADJACENCY,
+    gl.LINE_STRIP_ADJACENCY,
+    # gl.QUADS,
+    gl.TRIANGLES,
+    gl.TRIANGLE_STRIP,
+    gl.TRIANGLE_FAN,
+    gl.TRIANGLE_STRIP_ADJACENCY,
+    gl.TRIANGLES_ADJACENCY,
+    # gl.PATCHES,
 ])
-mode_index = modes.index(gl.GL_TRIANGLES)
+mode_index = modes.index(gl.TRIANGLES)
 
 fills = [
-    gl.GL_FILL,
-    gl.GL_POINT,
-    gl.GL_LINE
+    gl.FILL,
+    gl.POINT,
+    gl.LINE
 ]
-fill_index = fills.index(gl.GL_LINE)
+fill_index = fills.index(gl.LINE)
 
 pt = 0.5
 
@@ -133,7 +133,7 @@ def on_key(win, key, code, action, mods):
     if action in [glfw.PRESS, glfw.REPEAT]:
         if key in [glfw.KEY_ESCAPE, glfw.KEY_Q]:
             # Quit
-            glfw.core.set_window_should_close(win, gl.GL_TRUE)
+            glfw.core.set_window_should_close(win, gl.TRUE)
         elif key == glfw.KEY_M:
             # Update draw mode (points, lines, triangles, quads, etc.)
             if mods & glfw.MOD_SHIFT:
@@ -174,8 +174,8 @@ def compile_shader(shader_source, shader_type):
     shader_id = gl.glCreateShader(shader_type)
     gl.glShaderSource(shader_id, dd(shader_source))
     gl.glCompileShader(shader_id)
-    shader_result = gl.glGetShaderiv(shader_id, gl.GL_COMPILE_STATUS)
-    shader_log = gl.glGetShaderiv(shader_id, gl.GL_INFO_LOG_LENGTH)
+    shader_result = gl.glGetShaderiv(shader_id, gl.COMPILE_STATUS)
+    shader_log = gl.glGetShaderiv(shader_id, gl.INFO_LOG_LENGTH)
     assert shader_result == gl.TRUE
     if shader_log > 0:
         error_message = gl.glGetShaderInfoLog(shader_id)
@@ -201,8 +201,8 @@ def compile_program(*shader_sources):
     for shader in shaders:
         gl.glAttachShader(program, shader)
     gl.glLinkProgram(program)
-    assert gl.glGetProgramiv(program, gl.GL_LINK_STATUS) == gl.TRUE
-    assert gl.glGetProgramiv(program, gl.GL_INFO_LOG_LENGTH) == 0, gl.glGetProgramInfoLog(program)
+    assert gl.glGetProgramiv(program, gl.LINK_STATUS) == gl.TRUE
+    assert gl.glGetProgramiv(program, gl.INFO_LOG_LENGTH) == 0, gl.glGetProgramInfoLog(program)
 
     # Cleanup shaders
     for shader in shaders:
@@ -246,19 +246,19 @@ gl.glBindAttribLocation(program, 1, 'color')
 vao = gl.glGenVertexArrays(1)
 buffer_id = gl.glGenBuffers(1)
 indices_buffer_id = gl.glGenBuffers(1)
-gl.glBindBuffer(gl.GL_ARRAY_BUFFER, buffer_id)
+gl.glBindBuffer(gl.ARRAY_BUFFER, buffer_id)
 
-gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, indices_buffer_id)
-gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER, indices.flatten(), gl.GL_STATIC_DRAW)
+gl.glBindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices_buffer_id)
+gl.glBufferData(gl.ELEMENT_ARRAY_BUFFER, indices.flatten(), gl.STATIC_DRAW)
 
 # ######################################################################
 # Render
 while not glfw.window_should_close(win):
     gl.glClear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    gl.glPolygonMode(gl.GL_FRONT_AND_BACK, fills[fill_index])
-    gl.glBufferData(gl.GL_ARRAY_BUFFER, data.nbytes, data, gl.GL_DYNAMIC_DRAW)
-    gl.glEnable(gl.GL_DEPTH_TEST)
-    gl.glDepthFunc(gl.GL_LESS)
+    gl.glPolygonMode(gl.FRONT_AND_BACK, fills[fill_index])
+    gl.glBufferData(gl.ARRAY_BUFFER, data.nbytes, data, gl.DYNAMIC_DRAW)
+    gl.glEnable(gl.DEPTH_TEST)
+    gl.glDepthFunc(gl.LESS)
     gl.glUseProgram(program)
 
     gl.glBindVertexArray(vao)
@@ -267,18 +267,18 @@ while not glfw.window_should_close(win):
     offset = ctypes.c_void_p(0)
     pos = gl.glGetAttribLocation(program, 'position')
     gl.glEnableVertexAttribArray(pos)
-    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, indices_buffer_id)
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, buffer_id)
-    gl.glVertexAttribPointer(pos, data['position'].shape[-1], gl.GL_FLOAT, False, stride, offset)
+    gl.glBindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices_buffer_id)
+    gl.glBindBuffer(gl.ARRAY_BUFFER, buffer_id)
+    gl.glVertexAttribPointer(pos, data['position'].shape[-1], gl.FLOAT, False, stride, offset)
 
     offset = ctypes.c_void_p(data.dtype['position'].itemsize)
     col = gl.glGetAttribLocation(program, 'color')
     gl.glEnableVertexAttribArray(col)
-    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, indices_buffer_id)
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, buffer_id)
-    gl.glVertexAttribPointer(col, data['color'].shape[-1], gl.GL_FLOAT, False, stride, offset)
+    gl.glBindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices_buffer_id)
+    gl.glBindBuffer(gl.ARRAY_BUFFER, buffer_id)
+    gl.glVertexAttribPointer(col, data['color'].shape[-1], gl.FLOAT, False, stride, offset)
 
-    gl.glDrawElements(modes[mode_index], len(indices), gl.GL_UNSIGNED_INT, None)
+    gl.glDrawElements(modes[mode_index], len(indices), gl.UNSIGNED_INT, None)
     gl.glDisableVertexAttribArray(vao)
 
     pixels = screenshot(pixels)

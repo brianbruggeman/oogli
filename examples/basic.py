@@ -1,5 +1,4 @@
 import oogli
-import numpy as np
 from DebugWindow import DebugWindow as Window
 
 vshader = '''
@@ -29,9 +28,9 @@ triangle = [
     (-0.5, -0.5)
 ]
 
-width, height = (100, 100)
+width, height = (640, 480)
 
-with Window('Oogli', width, height) as win:
+with Window('Oogli', width=width, height=height) as win:
     # Main Loop
     program.load(vertices=triangle)
     while win.open is True:
