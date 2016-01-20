@@ -124,6 +124,7 @@ class Window(object):
                 glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
                 glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, gl.GL_TRUE)
                 glfw.window_hint(glfw.VISIBLE, False)
+                glfw.window_hint(glfw.FOCUSED, False)
                 window = glfw.core.create_window(1, 1, title, ffi.NULL, ffi.NULL)
                 if window != ffi.NULL:
                     glfw.destroy_window(window)
@@ -161,7 +162,7 @@ class Window(object):
     def focus(self, value):
         if value in [True, False, gl.TRUE, gl.FALSE]:
             self._focus = value
-            glfw.window_hint(glfw.FOCUS, self._focus)
+            glfw.window_hint(glfw.FOCUSED, self._focus)
         return self._focus
 
     def render(self):

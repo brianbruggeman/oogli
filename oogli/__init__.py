@@ -42,6 +42,8 @@ additionally follow these three criteria:
 import atexit
 
 import glfw
+from glfw import gl
+import numpy as np
 
 from .Program import Program
 from .Window import Window
@@ -75,6 +77,28 @@ def cycle():
     assert glfw.core.init() != 0
     glfw.core.swap_buffers()
     glfw.core.poll_events()
+
+
+def screenshot(pixels):
+    assert isinstance(pixels, np.ndarray), 'data must be a numpy array'
+    width, height = pixels.shape[0:2]
+    return gl.read_pixels(0, 0, width, height, gl.RGB, gl.UNSIGNED_BYTE, pixels)
+
+
+def opengl_supported(major, minor):
+    '''Determines if opengl is supported for the version provided'''
+    version = (major, minor)
+    glfw.core.window_hint(glfw.FOCUSED, False)
+    glfw.core.window_hint(glfw.CONTEXT_VERSION_MAJOR, major)
+    glfw.core.window_hint(glfw.CONTEXT_VERSION_MINOR, minor)
+    profile = glfw.OPENGL_ANY_PROFILE if version < (3, 2) else glfw.OPENGL_CORE_PROFILE
+    glfw.core.window_hint(glfw.OPENGL_PROFILE, profile)
+    # Setup forward compatibility if able
+    forward_compat = False if version < (3, 0) else True
+    glfw.core.window_hint(glfw.OPENGL_FORWARD_COMPAT, forward_compat)
+    #  Keep the window invisible
+    glfw.core.window_hint(glfw.VISIBLE, False)
+    return glfw.create_window(title='test', width=1, height=1) != 0
 
 
 ###############################################################################

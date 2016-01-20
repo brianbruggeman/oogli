@@ -13,7 +13,7 @@ fshader = '''
     #version 410
     out vec4 frag_color;
     void main () {
-        frag_color = vec4(0.3, 1.0, 0.3, 1.0);
+        frag_color = vec4(0.2, 1.0, 0.2, 1.0);
     }
 '''
 
@@ -24,7 +24,9 @@ program = oogli.Program(vshader, fshader)
 # Vertices for a 2D Triangle
 triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
 
-with Window('Oogli', 100, 100) as win:
+width, height = (100, 100)
+
+with Window('Oogli', width, height) as win:
     # Main Loop
     program.load(vertices=triangle)
     while win.open is True:
