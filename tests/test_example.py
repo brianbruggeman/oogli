@@ -24,14 +24,14 @@ def test_example():
         }
     '''
 
-    if not oogli.opengl_supported(4, 1):
-        pytest.skip("Unsupported configuration")
+    major, minor = (4, 1)
+    if not oogli.opengl_supported(major, minor):
+        error_message = "OpenGL {major}.{minor} is not supported."
+        pytest.skip(error_message.format(major=major, minor=minor))
 
     # Create a program from the shaders
     #  Note: This will auto request an OpenGL context of 4.1
     program = oogli.Program(v_shader, f_shader)
-    version = major, minor = program.version
-    print('Opengl: {}'.format(version))
 
     # Vertices for a 2D Triangle
     triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
