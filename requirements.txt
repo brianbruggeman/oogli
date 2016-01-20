@@ -3,7 +3,7 @@ docopt==0.6.2
 freetype-py==1.0.2
 future==0.15.2
 glfw-cffi==0.1.8
-numpy==1.10.4
+numpy
 pycparser==2.14
 PyOpenGL==3.1.0
 wheel==0.26.0
