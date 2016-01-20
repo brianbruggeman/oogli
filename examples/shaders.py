@@ -251,7 +251,6 @@ gl.glBindBuffer(gl.GL_ARRAY_BUFFER, buffer_id)
 gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, indices_buffer_id)
 gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER, indices.flatten(), gl.GL_STATIC_DRAW)
 
-
 # ######################################################################
 # Render
 while not glfw.window_should_close(win):

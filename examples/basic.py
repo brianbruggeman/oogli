@@ -1,4 +1,5 @@
 import oogli
+import numpy as np
 from DebugWindow import DebugWindow as Window
 
 vshader = '''
@@ -22,7 +23,11 @@ fshader = '''
 program = oogli.Program(vshader, fshader)
 
 # Vertices for a 2D Triangle
-triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
+triangle = [
+    (0.0, 0.5),
+    (-0.5, 0.5),
+    (-0.5, -0.5)
+]
 
 width, height = (100, 100)
 
