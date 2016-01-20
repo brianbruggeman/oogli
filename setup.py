@@ -85,6 +85,13 @@ tests_require = [
     'pytest-cov',
 ]
 
+install_requires = [
+    'cffi',
+    'future',
+    'glfw-cffi',
+    'numpy',
+]
+
 setup(
     name=data.get('title'),
     version=data.get('version'),
@@ -113,12 +120,9 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
         ],
-    install_requires=[
-        'glfw-cffi',
-        'numpy'
-    ],
+    install_requires=install_requires,
     setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
+    tests_require=tests_require,
     test_suite='{}.test'.format(package_name),
     cmdclass={'test': PyTest},
 )
