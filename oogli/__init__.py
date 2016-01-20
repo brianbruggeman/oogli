@@ -100,7 +100,7 @@ def opengl_supported(major, minor):
     glfw.core.window_hint(glfw.VISIBLE, gl.FALSE)
     glfw.core.window_hint(glfw.FOCUSED, gl.FALSE)
     win = glfw.create_window(title='test', width=1, height=1)
-    return win != None
+    return win is not None
 
 
 ###############################################################################
