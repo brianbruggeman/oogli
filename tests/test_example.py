@@ -35,7 +35,7 @@ def test_example():
 
     # Vertices for a 2D Triangle
     triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
-    width, height = 640, 480
+    width, height = 100, 100
     num_of_bytes = 3
 
     pixels = np.zeros((width, height, num_of_bytes), dtype=np.uint8)
@@ -56,7 +56,7 @@ def test_example():
                 running = False
             elif count > count_stop:
                 running = False
-            pixels = oogli.screenshot(pixels)
+            pixels = oogli.screenshot(win)
 
     # Checksum image
     pixel_sum = np.sum(pixels)

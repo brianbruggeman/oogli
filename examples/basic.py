@@ -33,7 +33,8 @@ width, height = (640, 480)
 with Window('Oogli', width=width, height=height) as win:
     # Main Loop
     program.load(vertices=triangle)
+    fill = oogli.gl.FILL
     while win.open is True:
         # Render triangle
-        program.draw()
+        program.draw(fill=fill)
         win.cycle()

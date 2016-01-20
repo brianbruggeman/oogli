@@ -79,9 +79,11 @@ def cycle():
     glfw.core.poll_events()
 
 
-def screenshot(pixels):
-    assert isinstance(pixels, np.ndarray), 'data must be a numpy array'
-    width, height = pixels.shape[0:2]
+def screenshot(win, pixels=None):
+    width, height = win.width, win.height
+    if not isinstance(pixels, np.ndarray):
+        shape = (width, height, 3)
+        pixels = np.zeros(shape, dtype=np.uint8)
     return gl.read_pixels(0, 0, width, height, gl.RGB, gl.UNSIGNED_BYTE, pixels)
 
 

@@ -281,7 +281,7 @@ while not glfw.window_should_close(win):
     gl.glDrawElements(modes[mode_index], len(indices), gl.UNSIGNED_INT, None)
     gl.glDisableVertexAttribArray(vao)
 
-    pixels = screenshot(pixels)
+    pixels = screenshot(win)
     # Standard Loop Event handling
     glfw.core.swap_buffers(win)
     glfw.core.poll_events()
