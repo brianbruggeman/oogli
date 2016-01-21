@@ -166,18 +166,13 @@ class Program(object):
         # gl.glVertexAttribPointer(vert, self.buffer['vertices'].shape[-1], gl.FLOAT, False, stride, None)
 
         last_varname = None
-        index_adjustment = 0
         for varindex, vardata in enumerate(self.bound_attributes.items()):
             varname, vartype = vardata
-            if vartype == 'uniform':
-                index_adjustment += 1
-                continue
-            if last_varname is None:
+            if last_varname is None or varname == last_varname:
                 offset = ctypes.c_void_p(0)
                 last_varname = varname
             else:
                 offset = ctypes.c_void_p(self.buffer.dtype[last_varname].itemsize)
-            varindex -= index_adjustment
             gl.enable_vertex_attrib_array(varindex)
             gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
             gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)

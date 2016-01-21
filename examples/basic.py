@@ -28,9 +28,10 @@ triangle = [
     (-0.5, -0.5)
 ]
 
-width, height = (640, 480)
+width, height = (800, 600)
+dark_grey = (0.1, 0.1, 0.1)
 
-with Window('Oogli', width=width, height=height) as win:
+with Window('Oogli', width=width, height=height, background=dark_grey) as win:
     # Main Loop
     program.load(vertices=triangle)
     fill = oogli.gl.FILL

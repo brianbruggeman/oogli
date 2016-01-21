@@ -50,7 +50,7 @@ class Window(object):
         fb_width, fb_height = glfw.get_framebuffer_size(self.win)
         return fb_height
 
-    def __init__(self, title='GLFW Example', height=480, width=640, major=None, minor=None, visible=True, focus=True):
+    def __init__(self, title='GLFW Example', height=480, width=640, major=None, minor=None, visible=True, focus=True, background=None):
         # Determine available major/minor compatibility
         #  This contains init and terminate logic for glfw, so it must be run first
         major, minor = self.get_opengl_version(major, minor)
@@ -89,6 +89,10 @@ class Window(object):
         # Set context
         glfw.core.make_context_current(self.win)
         self.init()
+        if background is not None:
+            bg = [0.0, 0.0, 0.0, 1.0]
+            background = list(background) + bg[len(background):]
+            gl.clear_color(*background)
 
     def __del__(self):
         '''Removes the glfw window'''
