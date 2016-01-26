@@ -66,7 +66,6 @@ class PyTest(TestCommand):
             '--pep8',
             '--flake8',
             '--norecursedirs'
-            # error: error in setup.cfg: command 'PyTest' has no such option 'norecursedirs'
         ]
         extra_args = os.environ.get('PYTEST_EXTRA_ARGS')
         if extra_args is not None:
@@ -79,17 +78,17 @@ class PyTest(TestCommand):
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
+install_requires = [
+    'cffi',
+    'glfw-cffi',
+    'numpy',
+]
+
 tests_require = [
     'pytest',
     'pytest-flake8',
     'pytest-cov',
-]
-
-install_requires = [
-    'cffi',
-    'future',
-    'glfw-cffi',
-    'numpy',
+    'pytest-xdist'
 ]
 
 setup(
@@ -119,9 +118,12 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
-        ],
+    ],
     install_requires=install_requires,
     setup_requires=['pytest-runner'],
+    extras_require={
+        'testing': tests_require,
+    },
     tests_require=tests_require,
     test_suite='{}.test'.format(package_name),
     cmdclass={'test': PyTest},

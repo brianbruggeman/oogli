@@ -281,13 +281,13 @@ while not glfw.window_should_close(win):
     gl.glDrawElements(modes[mode_index], len(indices), gl.UNSIGNED_INT, None)
     gl.glDisableVertexAttribArray(vao)
 
-    pixels = screenshot(win)
+    pixels = screenshot(pixels)
     # Standard Loop Event handling
     glfw.core.swap_buffers(win)
     glfw.core.poll_events()
 
 checksum = np.sum(pixels)
-assert checksum == 39499, checksum
+assert checksum == 35587, checksum
 
 # ######################################################################
 # Cleanup

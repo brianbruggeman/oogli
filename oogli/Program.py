@@ -36,6 +36,7 @@ class Program(object):
         self.loaded = False
         self.built = False
         self.bound_attributes = OrderedDict()
+        self.uniforms = {}
 
     @property
     def program(self):
@@ -78,6 +79,10 @@ class Program(object):
         for shader in shaders:
             if isinstance(shader, Shader):
                 self.attach(shader)
+                for varname in shader:
+                    if shader[varname] == 'uniform':
+                        self.uniforms[varname] = shader
+
         # Link Shaders
         gl.link_program(self.program)
         # Check for errors
@@ -111,9 +116,10 @@ class Program(object):
             self.buffer = kwds.pop('data', data)
             data_len = len(self.buffer)
             if data_len == 0:
-                data = {}
-                for key, val in kwds.items():
-                    if key in self.vert:
+                data = OrderedDict()
+                for key in self.bound_attributes:
+                    if key in kwds and key in self.vert:
+                        val = kwds[key]
                         if self.vert[key] == 'uniform':
                             setattr(self.vert, key, val)
                         else:
@@ -152,35 +158,25 @@ class Program(object):
         # Setup for drawing
         gl.clear(self.bits)
         gl.polygon_mode(gl.FRONT_AND_BACK, fill or self.fill)
-        gl.buffer_data(gl.ARRAY_BUFFER, self.buffer.nbytes, self.buffer, gl.DYNAMIC_DRAW)
         gl.enable(gl.DEPTH_TEST)
         gl.depth_func(gl.LESS)
         gl.use_program(self.program)
 
         gl.bind_vertex_array(self.vao)
+        gl.buffer_data(gl.ARRAY_BUFFER, self.buffer.nbytes, self.buffer, gl.DYNAMIC_DRAW)
         stride = self.buffer.strides[0]
-        # vert = gl.glGetAttribLocation(self.program, 'vertices')
-        # gl.glEnableVertexAttribArray(vert)
-        # gl.glBindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-        # gl.glBindBuffer(gl.ARRAY_BUFFER, self.buffer_id)
-        # gl.glVertexAttribPointer(vert, self.buffer['vertices'].shape[-1], gl.FLOAT, False, stride, None)
 
         last_varname = None
-        index_adjustment = 0
         for varindex, vardata in enumerate(self.bound_attributes.items()):
             varname, vartype = vardata
-            if vartype == 'uniform':
-                index_adjustment += 1
-                continue
             if last_varname is None:
-                offset = ctypes.c_void_p(0)
+                offset = None
                 last_varname = varname
             else:
-                offset = ctypes.c_void_p(self.buffer.dtype[last_varname].itemsize)
-            varindex -= index_adjustment
+                offset = self.buffer.dtype[last_varname].itemsize
+            offset = ctypes.c_void_p(offset)
             gl.enable_vertex_attrib_array(varindex)
             gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-            gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)
             gl.vertex_attrib_pointer(
                 varindex,
                 self.buffer[varname].shape[-1],

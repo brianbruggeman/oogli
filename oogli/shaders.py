@@ -73,6 +73,10 @@ class Shader(object):
         else:
             raise KeyError('Could not set "{}"'.format(key))
 
+    def __iter__(self):
+        for key in self.vars:
+            yield key
+
     def set_context(self, version):
         major, minor = version
         glfw.core.window_hint(glfw.FOCUSED, False)
