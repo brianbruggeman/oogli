@@ -122,7 +122,6 @@ setup(
     install_requires=install_requires,
     setup_requires=['pytest-runner'],
     extras_require={
-        'testing': tests_require,
     },
     tests_require=tests_require,
     test_suite='{}.test'.format(package_name),
