@@ -24,14 +24,13 @@ def test_basic_example():
         }
     '''
 
-    major, minor = (4, 1)
-    if not oogli.opengl_supported(major, minor):
-        error_message = "OpenGL {major}.{minor} is not supported."
-        pytest.skip(error_message.format(major=major, minor=minor))
-
     # Create a program from the shaders
     #  Note: This will auto request an OpenGL context of 4.1
     program = oogli.Program(v_shader, f_shader)
+    major, minor = program.version
+    if not oogli.opengl_supported(major, minor):
+        error_message = "OpenGL {major}.{minor} is not supported."
+        pytest.skip(error_message.format(major=major, minor=minor))
 
     # Vertices for a 2D Triangle
     triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
@@ -98,14 +97,13 @@ def test_color_example():
         }
     '''
 
-    major, minor = (4, 1)
-    if not oogli.opengl_supported(major, minor):
-        error_message = "OpenGL {major}.{minor} is not supported."
-        pytest.skip(error_message.format(major=major, minor=minor))
-
     # Create a program from the shaders
     #  Note: This will auto request an OpenGL context of 4.1
     program = oogli.Program(v_shader, f_shader)
+    major, minor = program.version
+    if not oogli.opengl_supported(major, minor):
+        error_message = "OpenGL {major}.{minor} is not supported."
+        pytest.skip(error_message.format(major=major, minor=minor))
 
     # Vertices for a 2D Triangle
     triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
@@ -170,14 +168,13 @@ def test_uniform_example():
         }
     '''
 
-    major, minor = (4, 1)
-    if not oogli.opengl_supported(major, minor):
-        error_message = "OpenGL {major}.{minor} is not supported."
-        pytest.skip(error_message.format(major=major, minor=minor))
-
     # Create a program from the shaders
     #  Note: This will auto request an OpenGL context of 4.1
     program = oogli.Program(v_shader, f_shader)
+    major, minor = program.version
+    if not oogli.opengl_supported(major, minor):
+        error_message = "OpenGL {major}.{minor} is not supported."
+        pytest.skip(error_message.format(major=major, minor=minor))
 
     # Vertices for a 2D Triangle
     triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
