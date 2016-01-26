@@ -89,7 +89,10 @@ class Shader(object):
         glfw.core.window_hint(glfw.OPENGL_FORWARD_COMPAT, forward_compat)
         #  Keep the window invisible
         glfw.core.window_hint(glfw.VISIBLE, False)
-        assert glfw.create_window(title='test', width=1, height=1)
+        win = glfw.create_window(title='test', width=1, height=1)
+        if win is not None:
+            glfw.core.destroy_window(win)
+        return major, minor
 
     def parse(self, source):
         '''Parses source looking for context required as well as
