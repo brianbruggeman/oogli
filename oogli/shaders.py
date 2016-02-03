@@ -9,18 +9,17 @@ from glfw import gl
 
 
 class Shader(object):
+
     '''Wrapper for opengl boilerplate code'''
 
     def __init__(self, source):
         assert glfw.core.init(), 'Error: GLFW could not be initialized'
-        self.bound_attributes = OrderedDict()
+        self.inputs = OrderedDict()
+        self.outputs = OrderedDict()
+        self.uniforms = OrderedDict()
         self.source = dd('\n'.join([l for l in source.split('\n') if l.strip()]))
         self.parse(source)
         self.compiled = False
-
-    @property
-    def vars(self):
-        return self.bound_attributes
 
     @property
     def shader(self):
@@ -59,22 +58,27 @@ class Shader(object):
         self.delete()
 
     def __contains__(self, key):
-        return key in self.bound_attributes
+        return key in self.inputs or key in self.uniforms
 
     def __getitem__(self, key):
-        if key not in self.bound_attributes:
+        if key not in (self.inputs + self.uniforms):
             raise KeyError('Could not set "{}"'.format(key))
         else:
-            return self.bound_attributes[key]
+            if key in self.inputs:
+                return self.inputs[key]
+            elif key in self.uniforms:
+                return self.uniforms[key]
 
     def __setitem__(self, key, val):
-        if key in self.bound_attributes:
+        if key in self.inputs or key in self.uniforms:
             setattr(self, key, val)
         else:
             raise KeyError('Could not set "{}"'.format(key))
 
     def __iter__(self):
-        for key in self.vars:
+        for key in self.inputs:
+            yield key
+        for key in self.uniforms:
             yield key
 
     def set_context(self, version):
@@ -95,21 +99,61 @@ class Shader(object):
         '''Parses source looking for context required as well as
         inputs and uniforms'''
         version_pattern = r'^\#version\s+(?P<version>[0-9]+)\s*$'
-        inputs_pattern = r'^in (?P<vartype>[a-zA-Z_0-9]+)\s+(?P<varname>[a-zA-Z_0-9]+)\s*\;$'
+        inputs2_pattern = ("\s*GLSL_TYPE\s+"
+                           "((highp|mediump|lowp)\s+)?"
+                           "(?P<vartype>\w+)\s+"
+                           "(?P<varname>\w+)\s*"
+                           "(\[(?P<varsize>\d+)\])?"
+                           "(\s*\=\s*(?P<vardefault>[0-9.]+))?"
+                           "\s*;"
+                           )
+        inputs_pattern = (
+            r'(?P<direction>(in|out|uniform))\s+'
+            r'((highp|mediump|lowp)\s+)?'
+            r'(?P<vartype>\w+)\s+'
+            r'(?P<varname>\w+)\s*'
+            r'(\s*\=\s*(?P=vartype)?(?P<vardefault>(.+)))?'
+            r'\;'
+        )
         version_eng = re.compile(version_pattern)
-        inputs_eng = re.compile(inputs_pattern)
         self.version = major, minor = (3, 2)
+        engines = (
+            [re.compile(inputs_pattern)] +
+            [
+                re.compile(inputs2_pattern.replace('GLSL_TYPE', kind), flags=re.MULTILINE)
+                for kind in ('uniform', 'attribute', 'varying', 'const')
+            ]
+        )
         for line in source.split('\n'):
             line = line.strip()
             if version_eng.search(line):
                 data = [m.groupdict() for m in version_eng.finditer(line)][0]
                 self.version = tuple([int(c) for c in data['version']][:2])
-            if inputs_eng.search(line):
-                data = [m.groupdict() for m in inputs_eng.finditer(line)][0]
-                varname = data['varname']
-                vartype = data['vartype']
-                setattr(self, varname, vartype)
-                self.bound_attributes[varname] = vartype
+            for eng in engines:
+                if eng.search(line):
+                    data = [m.groupdict() for m in eng.finditer(line)][0]
+                    varname = data['varname']
+                    vartype = data['vartype']
+                    direction = data['direction']
+                    default = data['vardefault']
+                    if direction == 'in':
+                        setattr(self, varname, vartype)
+                        self.inputs[varname] = vartype
+                    elif direction == 'out':
+                        setattr(self, varname, vartype)
+                        self.outputs[varname] = vartype
+                    elif direction == 'uniform':
+                        setattr(self, varname, vartype)
+                        if default:
+                            self.uniforms[varname] = (vartype, default)
+                        else:
+                            self.uniforms[varname] = vartype
+                    break
+        print(source)
+        print('found inputs: {}'.format(self.inputs))
+        print('found outputs: {}'.format(self.outputs))
+        print('found uniforms: {}'.format(self.uniforms))
+        import pdb; pdb.set_trace()
         self.set_context(self.version)
 
     def __repr__(self):
