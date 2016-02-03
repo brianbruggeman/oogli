@@ -100,7 +100,7 @@ def test_basic_load_example(options):
 
     # Setup window and screenshot pixels
     width, height = options['width'], options['height']
-    with oogli.Window(title='Oogli|Test|Basic Example',
+    with oogli.Window(title='Oogli|Test|Basic Load Example',
                       width=width, height=height,
                       major=major, minor=minor,
                       focus=False, visible=False) as win:
@@ -173,7 +173,7 @@ def test_color_example(options):
 
     # Setup window and screenshot pixels
     width, height = options['width'], options['height']
-    with oogli.Window(title='Oogli',
+    with oogli.Window(title='Oogli|Test|Color Example',
                       width=width, height=height,
                       major=major, minor=minor,
                       focus=False, visible=False) as win:
@@ -245,7 +245,7 @@ def test_color_load_example(options):
 
     # Setup window and screenshot pixels
     width, height = options['width'], options['height']
-    with oogli.Window(title='Oogli',
+    with oogli.Window(title='Oogli|Test|Color Load Example',
                       width=width, height=height,
                       major=major, minor=minor,
                       focus=False, visible=False) as win:
@@ -314,7 +314,7 @@ def test_uniform_example(options):
 
     # Setup window and screenshot pixels
     width, height = options['width'], options['height']
-    with oogli.Window(title='Oogli',
+    with oogli.Window(title='Oogli|Test|Uniform Example',
                       width=width, height=height,
                       major=major, minor=minor,
                       focus=False, visible=False) as win:
@@ -382,7 +382,7 @@ def test_uniform_load_example(options):
 
     # Setup window and screenshot pixels
     width, height = options['width'], options['height']
-    with oogli.Window(title='Oogli',
+    with oogli.Window(title='Oogli|Test|Uniform Load Example',
                       width=width, height=height,
                       major=major, minor=minor,
                       focus=False, visible=False) as win:
