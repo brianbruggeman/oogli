@@ -14,6 +14,7 @@ vshader = '''
 
 fshader = '''
     #version 410
+    uniform vec3 colored = vec3(0.2, 1.0, 0.2);
     in vec3 vcolors;
     out vec4 frag_color;
     void main () {
@@ -29,7 +30,7 @@ program = oogli.Program(vshader, fshader)
 # Vertices for a 2D Triangle
 triangle = [
     (0.0, 0.5),
-    (-0.5, 0.5),
+    (0.5, -0.5),
     (-0.5, -0.5)
 ]
 

@@ -30,12 +30,18 @@ class Shader(object):
     def compile(self):
         '''Compiles and checks output'''
         if not self.compiled:
-            gl.shader_source(self.shader, self.source)
-            gl.compile_shader(self.shader)
-            result = gl.get_shaderiv(self.shader, gl.COMPILE_STATUS)
-            log_length = gl.get_shaderiv(self.shader, gl.INFO_LOG_LENGTH)
-            assert result == gl.TRUE and log_length == 0, gl.get_shader_info_log(self.shader)
-            return self.shader
+            shader_id = self.shader
+            gl.shader_source(shader_id, self.source)
+            gl.compile_shader(shader_id)
+            result = gl.get_shaderiv(shader_id, gl.COMPILE_STATUS)
+            log_length = gl.get_shaderiv(shader_id, gl.INFO_LOG_LENGTH)
+            log = ''
+            if log_length != 0:
+                log = gl.get_shader_info_log(shader_id)
+            if log.strip():
+                assert result == gl.TRUE and log_length == 0, log
+            self.compiled = True
+            return shader_id
 
     def attach(self, program):
         if not self.compiled:
@@ -61,7 +67,7 @@ class Shader(object):
         return key in self.inputs or key in self.uniforms
 
     def __getitem__(self, key):
-        if key not in (self.inputs + self.uniforms):
+        if key not in self.inputs and key not in self.uniforms:
             raise KeyError('Could not set "{}"'.format(key))
         else:
             if key in self.inputs:
@@ -145,22 +151,24 @@ class Shader(object):
                     elif direction == 'uniform':
                         setattr(self, varname, vartype)
                         if default:
-                            self.uniforms[varname] = (vartype, default)
+                            self.uniforms[varname] = ('uniform', vartype, default)
                         else:
-                            self.uniforms[varname] = vartype
+                            self.uniforms[varname] = ('uniform', vartype, )
                     break
-        print(source)
-        print('found inputs: {}'.format(self.inputs))
-        print('found outputs: {}'.format(self.outputs))
-        print('found uniforms: {}'.format(self.uniforms))
-        import pdb; pdb.set_trace()
         self.set_context(self.version)
 
     def __repr__(self):
         cname = self.__class__.__name__
         version = self.version
-        vars = ', '.join(a for a in self.bound_attributes)
-        string = '<{cname}{version} vars=[{vars}]>'.format(cname=cname, version=version, vars=vars)
+        inputs = ''
+        uniforms = ''
+        if self.inputs.keys():
+            inputs = 'inputs=[{}]'.format(', '.join(a for a in self.inputs.keys()))
+        if self.uniforms.keys():
+            uniforms = 'uniforms=[{}]'.format(', '.join(a for a in self.uniforms.keys()))
+            if inputs:
+                uniforms = ' {}'.format(uniforms)
+        string = '<{cname}{version} {inputs}{uniforms}>'.format(**locals())
         return string
 
 

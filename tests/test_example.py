@@ -19,9 +19,10 @@ def test_basic_example(options):
 
     f_shader = '''
         #version 410
+        uniform vec3 color = vec3(1.0, 0.2, 0.2);
         out vec4 frag_color;
         void main () {
-            frag_color = vec4(0.2, 1.0, 0.2, 1.0);
+            frag_color = vec4(color, 1.0);
         }
     '''
 
@@ -44,12 +45,13 @@ def test_basic_example(options):
         # Main Loop
         # Loop through only once
         count = 0
-        count_stop = 1
+        count_stop = 100
         running = True
+        data = program.load(data=vertices)
         start_time = time.time()
         while running:
             # Render triangle
-            program.draw(vertices=vertices)
+            program.draw()
             count += 1
             if win.open is False:
                 running = False
@@ -62,7 +64,8 @@ def test_basic_example(options):
     # Checksum image
     pixel_sum = np.sum(pixels)
     checksum = options['checksum']  # simple green triangle
-    print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
+    fps = count / delta
+    assert fps > 50, 'Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, fps)
     assert pixel_sum == checksum
 
 

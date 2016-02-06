@@ -11,10 +11,14 @@ def options():
     config = {
         'width': 100,
         'height': 100,
-        'triangle': [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)],
+        'triangle': [
+            (0.0, 0.5),
+            (0.5, -0.5),
+            (-0.5, -0.5)
+        ],
         'colors': [green, green, green],
         'color': green,
-        'checksum': 35587,
+        'checksum': 53007,
     }
 
     return config

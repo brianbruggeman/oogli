@@ -1,4 +1,5 @@
 import oogli
+from oogli import np
 from DebugWindow import DebugWindow as Window
 
 vshader = '''
@@ -24,7 +25,7 @@ program = oogli.Program(vshader, fshader)
 # Vertices for a 2D Triangle
 triangle = [
     (0.0, 0.5),
-    (-0.5, 0.5),
+    (0.5, -0.5),
     (-0.5, -0.5)
 ]
 
@@ -36,4 +37,7 @@ with Window('Oogli', width=width, height=height) as win:
     while win.open is True:
         # Render triangle
         program.draw()
+        pixels = oogli.screenshot(win)
         win.cycle()
+
+print('Checksum: {}'.format(np.sum(pixels)))

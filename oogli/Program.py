@@ -14,6 +14,7 @@ from .shaders import (
     TessellationControlShader,
     TessellationEvaluationShader,
 )
+from .utils import uniform_mapping
 
 
 def array(val, vtype=np.float32):
@@ -35,13 +36,15 @@ class Program(object):
         self.geo = GeometryShader(geo) if geo is not None else None
         self.loaded = False
         self.built = False
-        self.bound_attributes = OrderedDict()
-        self.uniforms = {}
+        self.created = False
+        self.inputs = OrderedDict()
+        self.uniforms = OrderedDict()
 
     @property
     def program(self):
         if not hasattr(self, '_program'):
             self._program = gl.create_program()
+            self.created = True
         return self._program
 
     def __getitem__(self, key):
@@ -72,6 +75,8 @@ class Program(object):
             for shader in (self.vert, self.frag, self.tc, self.te, self.geo)
             if isinstance(shader, Shader)
         ]
+        program_id = self.program
+        assert program_id != 0
         error_message = 'Both a vertex and fragment shader must be provided.'
         assert len(shaders) >= 2, error_message
         assert self.vert is not None and self.frag is not None, error_message
@@ -80,23 +85,35 @@ class Program(object):
             if isinstance(shader, Shader):
                 self.attach(shader)
                 for varname in shader:
-                    if shader[varname] == 'uniform':
+                    val = shader[varname]
+                    if isinstance(val, (tuple, list)) and val[0] == 'uniform':
                         self.uniforms[varname] = shader
 
         # Link Shaders
-        gl.link_program(self.program)
+        gl.link_program(program_id)
         # Check for errors
-        result = gl.get_programiv(self.program, gl.LINK_STATUS)
-        log_length = gl.get_programiv(self.program, gl.INFO_LOG_LENGTH)
-        assert result == gl.TRUE and log_length == 0, gl.get_program_info_log(self.program)
-        self.bound_attributes = OrderedDict((k, v) for k, v in self.vert.bound_attributes.items())
+        result = gl.get_programiv(program_id, gl.LINK_STATUS)
+        log_length = gl.get_programiv(program_id, gl.INFO_LOG_LENGTH)
+        log = ''
+        if log_length != 0:
+            log = gl.get_program_info_log(program_id)
+        if log.strip():
+            assert result == gl.TRUE and log_length == 0, log
+        self.inputs = OrderedDict((k, v) for k, v in self.vert.inputs.items())
         # Cleanup shaders
         for shader in shaders:
             if isinstance(shader, Shader):
                 shader.cleanup(program=self)
         # Bind the attributes based on their index in bound_attributes
-        for index, varname in enumerate(self.bound_attributes):
-            gl.bind_attrib_location(self.program, index, varname)
+        for index, varname in enumerate(self.inputs):
+            gl.bind_attrib_location(program_id, index, varname)
+        # Bind the uniforms based on their index in bound_attributes
+        for index, varname in enumerate(self.uniforms):
+            shader = self.uniforms[varname]
+            vardata = shader[varname]
+            uniform_binder = uniform_mapping.get(vardata[1])
+            # TODO:  Add uniform binding, setup layout reading
+        self.built = True
 
     def load(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], **kwds):
         if not self.built:
@@ -113,27 +130,31 @@ class Program(object):
             self.mode = mode
             self.fill = fill
 
-            self.buffer = kwds.pop('data', data)
-            data_len = len(self.buffer)
+            # TODO:  FIX THIS!
+            if not isinstance(data, np.ndarray):
+                data = np.array(data, dtype='f')
+            data_len = len(data)
             if data_len == 0:
-                data = OrderedDict()
-                for key in self.bound_attributes:
+                interleaved = OrderedDict()
+                for key in self.inputs:
                     if key in kwds and key in self.vert:
                         val = kwds[key]
                         if self.vert[key] == 'uniform':
                             setattr(self.vert, key, val)
                         else:
-                            data[key] = val if isinstance(val, np.ndarray) else array(val)
-                            data_len = len(data[key])
+                            interleaved[key] = val if isinstance(val, np.ndarray) else array(val)
+                            data_len = len(interleaved[key])
                             setattr(self.vert, key, val)
                 self.buffer = np.zeros(
                     data_len,
-                    dtype=[(k, v.dtype, v.shape[-1]) for k, v in data.items()]
+                    dtype=[(k, v.dtype, v.shape[-1]) for k, v in interleaved.items()]
                 )
-                for key, val in data.items():
+                for key, val in interleaved.items():
                     self.buffer[key] = val
+            elif not hasattr(self, 'buffer'):
+                self.buffer = data
 
-            if not indices:
+            if isinstance(indices, list) and not indices:
                 self.indices = range(data_len)
             else:
                 self.indices = indices
@@ -148,11 +169,12 @@ class Program(object):
             gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)
             gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
             gl.buffer_data(gl.ELEMENT_ARRAY_BUFFER, self.indices.flatten(), gl.GL_STATIC_DRAW)
+        return self.buffer
 
     def draw(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], **kwds):
         '''Converts list data into array data and binds numpy arrays to
         vertex shader inputs.'''
-        if data or indices:
+        if isinstance(data, list) and data or isinstance(indices, list) and indices:
             self.loaded = False
         self.load(mode=mode, fill=fill, indices=indices, data=data, **kwds)
         # Setup for drawing
@@ -167,18 +189,19 @@ class Program(object):
         stride = self.buffer.strides[0]
 
         last_varname = None
-        for varindex, vardata in enumerate(self.bound_attributes.items()):
+        for varindex, vardata in enumerate(self.inputs.items()):
             varname, vartype = vardata
             if last_varname is None:
                 offset = None
                 last_varname = varname
             else:
                 offset = self.buffer.dtype[last_varname].itemsize
+            loc = gl.glGetAttribLocation(self.program, varname)
             offset = ctypes.c_void_p(offset)
-            gl.enable_vertex_attrib_array(varindex)
+            gl.enable_vertex_attrib_array(loc)
             gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
             gl.vertex_attrib_pointer(
-                varindex,
+                loc,
                 self.buffer[varname].shape[-1],
                 gl.GL_FLOAT,
                 False,
@@ -187,6 +210,7 @@ class Program(object):
             )
         gl.draw_elements(mode or self.mode, len(self.indices), gl.GL_UNSIGNED_INT, None)
         gl.glDisableVertexAttribArray(self.vao)
+        return self.buffer
 
     def __repr__(self):
         cname = self.__class__.__name__
