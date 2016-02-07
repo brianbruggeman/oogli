@@ -1,3 +1,5 @@
+from __future__ import division
+
 import oogli
 from oogli import np
 from DebugWindow import DebugWindow as Window
@@ -36,12 +38,31 @@ blue = (0.2, 0.2, 1.0)
 red = (1.0, 0.2, 0.2)
 
 
+def color(step=1):
+    '''Smooth color transition'''
+    while True:
+        start = 10
+        end = 250
+        data = [0, 0, 0]
+        for x in range(3):
+            for _ in range(start, end, step):
+                val = _ / end
+                data[x] = val
+                yield data
+        for x in range(3):
+            for _ in range(end, start, -step):
+                val = _ / end
+                data[x] = val
+                yield data
+
+
 with Window('Oogli', width=width, height=height) as win:
     # Main Loop
     program.load(vertices=triangle, color=blue)
+    colors = color()
     while win.open is True:
         # Render triangle
-        program.draw()
+        program.draw(fill=win.fill, mode=win.mode, color=colors.next())
         pixels = oogli.screenshot(win)
         win.cycle()
 
