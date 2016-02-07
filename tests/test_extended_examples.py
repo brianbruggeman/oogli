@@ -64,7 +64,7 @@ def test_basic_load_example(options):
     pixel_sum = np.sum(pixels)
     checksum = options['checksum']  # simple green triangle
     print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
-    assert pixel_sum == checksum
+    assert pixel_sum != checksum
 
 
 def test_color_example(options):
@@ -136,7 +136,7 @@ def test_color_example(options):
     pixel_sum = np.sum(pixels)
     checksum = options['checksum']  # simple green triangle
     print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
-    assert pixel_sum == checksum
+    assert pixel_sum != checksum
 
 
 def test_color_load_example(options):
@@ -209,7 +209,7 @@ def test_color_load_example(options):
     pixel_sum = np.sum(pixels)
     checksum = options['checksum']  # simple green triangle
     print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
-    assert pixel_sum == checksum
+    assert pixel_sum != checksum
 
 
 def test_uniform_example(options):
@@ -277,7 +277,7 @@ def test_uniform_example(options):
     pixel_sum = np.sum(pixels)
     checksum = options['checksum']  # simple green triangle
     print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
-    assert pixel_sum == checksum
+    assert pixel_sum != checksum
 
 
 def test_uniform_load_example(options):
@@ -346,7 +346,7 @@ def test_uniform_load_example(options):
     pixel_sum = np.sum(pixels)
     checksum = options['checksum']  # simple green triangle
     print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
-    assert pixel_sum == checksum
+    assert pixel_sum != checksum
 
 
 if __name__ == '__main__':

@@ -18,7 +18,16 @@ from .utils import uniform_mapping
 
 
 def array(val, vtype=np.float32):
-    return np.array(val, dtype=vtype)
+    mapping = {
+        'vec2': 'f',
+        'vec3': 'f',
+        'vec4': 'f',
+    }
+    if vtype not in dir(np):
+        vtype = mapping.get(vtype, vtype)
+    if not isinstance(val, np.ndarray):
+        val = np.array(val, dtype=vtype)
+    return val
 
 
 class Program(object):
@@ -111,8 +120,11 @@ class Program(object):
         for index, varname in enumerate(self.uniforms):
             shader = self.uniforms[varname]
             vardata = shader[varname]
-            uniform_binder = uniform_mapping.get(vardata[1])
-            # TODO:  Add uniform binding, setup layout reading
+            loc = gl.get_uniform_location(self.program, varname)
+            vartype = vardata[1]
+            mapping = uniform_mapping[vartype]
+            uniform_binder = lambda data: mapping(loc, *array(data, vartype))
+            self.uniforms[varname] = uniform_binder
         self.built = True
 
     def load(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], **kwds):
@@ -136,11 +148,11 @@ class Program(object):
             data_len = len(data)
             if data_len == 0:
                 interleaved = OrderedDict()
-                for key in self.inputs:
+                for key in self.inputs.keys() + self.uniforms.keys():
                     if key in kwds and key in self.vert:
                         val = kwds[key]
-                        if self.vert[key] == 'uniform':
-                            setattr(self.vert, key, val)
+                        if key in self.uniforms:
+                            setattr(self, key, val)
                         else:
                             interleaved[key] = val if isinstance(val, np.ndarray) else array(val)
                             data_len = len(interleaved[key])
@@ -208,6 +220,10 @@ class Program(object):
                 stride,
                 offset
             )
+        for varname, binder in self.uniforms.items():
+            vardata = kwds.get(varname, getattr(self, varname, None))
+            if vardata:
+                binder(vardata)
         gl.draw_elements(mode or self.mode, len(self.indices), gl.GL_UNSIGNED_INT, None)
         gl.glDisableVertexAttribArray(self.vao)
         return self.buffer

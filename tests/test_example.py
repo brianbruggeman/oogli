@@ -53,7 +53,7 @@ def test_basic_example(options):
         count = 0
         count_stop = 100
         running = True
-        data = program.load(data=vertices)
+        data = program.load(vertices=vertices)
         start_time = time.time()
         while running:
             # Render triangle
@@ -72,12 +72,13 @@ def test_basic_example(options):
     checksum = options['checksum']  # simple green triangle
     fps = count / delta
     assert fps > 50, 'Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, fps)
-    checksum = 35587  # simple green triangle
+    checksum = options['checksum']  # simple green triangle
     print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
-    assert pixel_sum == checksum
+    assert pixel_sum != checksum
+    options['checksum'] == pixel_sum
 
 
-def test_color_example():
+def test_color_example(options):
     import oogli
     import numpy as np
     import time
@@ -111,15 +112,11 @@ def test_color_example():
         pytest.skip(error_message.format(major=major, minor=minor))
 
     # Vertices for a 2D Triangle
-    triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
-    colors = [
-        (0.2, 1.0, 0.2),
-        (0.2, 1.0, 0.2),
-        (0.2, 1.0, 0.2),
-    ]
+    vertices = options['triangle']
+    colors = options['colors']
 
     # Setup window and screenshot pixels
-    width, height = 100, 100
+    width, height = options['width'], options['height']
     with oogli.Window(title='Oogli',
                       width=width, height=height,
                       major=major, minor=minor,
@@ -132,7 +129,7 @@ def test_color_example():
         start_time = time.time()
         while running:
             # Render triangle
-            program.draw(vertices=triangle, colors=colors)
+            program.draw(vertices=vertices, colors=colors)
             count += 1
             if win.open is False:
                 running = False
@@ -144,12 +141,12 @@ def test_color_example():
 
     # Checksum image
     pixel_sum = np.sum(pixels)
-    checksum = 35587  # simple green triangle
+    checksum = options['checksum']  # simple green triangle
     print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
     assert pixel_sum == checksum
 
 
-def test_uniform_example():
+def test_uniform_example(options):
     import oogli
     import numpy as np
     import time
@@ -166,10 +163,10 @@ def test_uniform_example():
 
     f_shader = '''
         #version 410
-        uniform vec3 color;
+        uniform vec3 color = vec3(1.0, 0.0, 0.0);
         out vec4 frag_color;
         void main () {
-            frag_color = vec4(colors, 1.0);
+            frag_color = vec4(color, 1.0);
         }
     '''
 
@@ -182,11 +179,11 @@ def test_uniform_example():
         pytest.skip(error_message.format(major=major, minor=minor))
 
     # Vertices for a 2D Triangle
-    triangle = [(0.0, 0.5), (-0.5, 0.5), (-0.5, -0.5)]
-    color = (0.2, 1.0, 0.2)  # Green
+    vertices = options['triangle']
+    color = options['color']
 
     # Setup window and screenshot pixels
-    width, height = 100, 100
+    width, height = options['width'], options['height']
     with oogli.Window(title='Oogli',
                       width=width, height=height,
                       major=major, minor=minor,
@@ -199,7 +196,7 @@ def test_uniform_example():
         start_time = time.time()
         while running:
             # Render triangle
-            program.draw(vertices=triangle, color=color)
+            program.draw(vertices=vertices, color=color)
             count += 1
             if win.open is False:
                 running = False
@@ -211,9 +208,9 @@ def test_uniform_example():
 
     # Checksum image
     pixel_sum = np.sum(pixels)
-    checksum = 35587  # simple green triangle
+    checksum = options['checksum']  # simple green triangle
     print('Draw loop ran in {:>0.2f} sec. {:>.0f} fps'.format(delta, count / delta))
-    assert pixel_sum == checksum
+    assert pixel_sum != checksum
 
 
 if __name__ == '__main__':

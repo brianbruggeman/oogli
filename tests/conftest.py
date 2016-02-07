@@ -8,7 +8,7 @@ def options():
 
     green = (0.2, 1.0, 0.2)
 
-    config = {
+    options = {
         'width': 100,
         'height': 100,
         'triangle': [
@@ -18,7 +18,7 @@ def options():
         ],
         'colors': [green, green, green],
         'color': green,
-        'checksum': 53007,
+        'checksum': 0,
     }
 
-    return config
+    return options
