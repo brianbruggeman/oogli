@@ -127,7 +127,7 @@ class Program(object):
             self.uniforms[varname] = uniform_binder
         self.built = True
 
-    def load(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], **kwds):
+    def load(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], bits=None, **kwds):
         if not self.built:
             try:
                 self.build()
@@ -138,7 +138,7 @@ class Program(object):
             self.built = True
         if not self.loaded:
             self.loaded = True
-            self.bits = gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
+            self.bits = bits or gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
             self.mode = mode
             self.fill = fill
 

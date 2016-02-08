@@ -16,6 +16,7 @@ def options():
             (0.5, -0.5),
             (-0.5, -0.5)
         ],
+        'indices': [0, 1, 2],
         'colors': [green, green, green],
         'color': green,
         'checksum': 0,

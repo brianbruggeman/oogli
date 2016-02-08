@@ -55,8 +55,7 @@ def color(step=1):
                 data[x] = val
                 yield data
 
-
-with Window('Oogli', width=width, height=height) as win:
+with Window('Oogli|Pulsing Triangle', width=width, height=height) as win:
     # Main Loop
     program.load(vertices=triangle, color=blue)
     colors = color()
