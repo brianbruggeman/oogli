@@ -209,17 +209,10 @@ class Program(object):
             else:
                 offset = self.buffer.dtype[last_varname].itemsize
             loc = gl.glGetAttribLocation(self.program, varname)
-            offset = ctypes.c_void_p(offset)
+            offset_wrapped = ctypes.c_void_p(offset)
             gl.enable_vertex_attrib_array(loc)
             gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-            gl.vertex_attrib_pointer(
-                loc,
-                self.buffer[varname].shape[-1],
-                gl.GL_FLOAT,
-                False,
-                stride,
-                offset
-            )
+            gl.vertex_attrib_pointer(loc, self.buffer[varname].shape[-1], gl.GL_FLOAT, False, stride, offset_wrapped)
         for varname, binder in self.uniforms.items():
             vardata = kwds.get(varname, getattr(self, varname, None))
             if vardata:
