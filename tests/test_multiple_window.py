@@ -74,3 +74,4 @@ def test_multiple_windows(options):
             program.draw(mode=win2.mode, fill=win2.fill, color=color.next())
             win2.cycle()
             win2.focus = False
+        break

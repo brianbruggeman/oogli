@@ -33,5 +33,6 @@ uniform_mapping = {
     'vec1': gl.uniform_1f,
     'vec2': gl.uniform_2f,
     'vec3': gl.uniform_3f,
+    'vec4': gl.uniform_4f,
+    'mat4': gl.uniform_matrix_4fv,
 }
-

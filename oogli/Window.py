@@ -26,6 +26,14 @@ class Window(object):
     def __exit__(self, *args, **kwds):
         glfw.core.set_window_should_close(self.win, True)
 
+    def clear(self):
+        '''Clears the window'''
+        black_background_color = [0.0, 0.0, 0.0, 1.0]
+        gl.clear_color(black_background_color)
+        gl.clear(gl.COLOR_BUFFER_BIT)
+        if self.open:
+            self.cycle()
+
     @property
     def width(self):
         '''Window width'''
@@ -179,6 +187,7 @@ class Window(object):
 
     def render(self):
         '''Empty scene'''
+        self.clear()
 
     def loop(self):
         '''Simplified loop'''

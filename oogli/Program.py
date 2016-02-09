@@ -18,15 +18,20 @@ from .utils import uniform_mapping
 
 
 def array(val, vtype=np.float32):
+    '''Converts value into an array'''
+    # Call out non-floating point mappings
     mapping = {
-        'vec2': 'f',
-        'vec3': 'f',
-        'vec4': 'f',
     }
-    if vtype not in dir(np):
+    # Only use mapping if numpy doesn't already have a type
+    if hasattr(vtype, '__name__') and vtype.__name__ not in dir(np):
+        # Allow for the option of passing through numpy shortcuts such
+        #  as 'f', 'u', 'i'
         vtype = mapping.get(vtype, vtype)
     if not isinstance(val, np.ndarray):
-        val = np.array(val, dtype=vtype)
+        try:
+            val = np.array(val, dtype=vtype)
+        except TypeError:
+            val = np.array(val, dtype=np.float32)
     return val
 
 
@@ -123,7 +128,11 @@ class Program(object):
             loc = gl.get_uniform_location(self.program, varname)
             vartype = vardata[1]
             mapping = uniform_mapping[vartype]
-            uniform_binder = lambda data: mapping(loc, *array(data, vartype))
+            if vartype.startswith('vec'):
+                uniform_binder = lambda data: mapping(loc, *array(data, vartype))
+            elif vartype.startswith('mat'):
+                # Different pattern
+                uniform_binder = lambda data: mapping(loc, 1, gl.FALSE, array(data, vartype))
             self.uniforms[varname] = uniform_binder
         self.built = True
 
@@ -138,18 +147,17 @@ class Program(object):
             self.built = True
         if not self.loaded:
             self.loaded = True
-            self.bits = bits or gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
+            self.bits = bits or (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
             self.mode = mode
             self.fill = fill
 
-            # TODO:  FIX THIS!
-            if not isinstance(data, np.ndarray):
+            if data and not isinstance(data, np.ndarray):
                 data = np.array(data, dtype='f')
             data_len = len(data)
             if data_len == 0:
                 interleaved = OrderedDict()
                 for key in self.inputs.keys() + self.uniforms.keys():
-                    if key in kwds and key in self.vert:
+                    if key in kwds:
                         val = kwds[key]
                         if key in self.uniforms:
                             setattr(self, key, val)
@@ -171,7 +179,7 @@ class Program(object):
             else:
                 self.indices = indices
             if not isinstance(self.indices, np.ndarray):
-                self.indices = array(self.indices, vtype=np.uint32)
+                self.indices = array(self.indices, vtype=np.uint32).flatten()
 
             self.vao = gl.gen_vertex_arrays(1)
 
@@ -193,7 +201,7 @@ class Program(object):
         gl.clear(self.bits)
         gl.polygon_mode(gl.FRONT_AND_BACK, fill or self.fill)
         gl.enable(gl.DEPTH_TEST)
-        gl.depth_func(gl.LESS)
+        # gl.depth_func(gl.LESS)
         gl.use_program(self.program)
 
         gl.bind_vertex_array(self.vao)
