@@ -50,7 +50,7 @@ from .Window import Window
 
 ###############################################################################
 __title__ = 'oogli'
-__version__ = '0.1.0-dev'
+__version__ = '0.1.0'
 __author__ = 'Brian Bruggeman'
 __email__ = 'brian.m.bruggeman@gmail.com'
 __license__ = 'Apache 2.0'
