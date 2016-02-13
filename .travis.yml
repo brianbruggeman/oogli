@@ -52,7 +52,6 @@ install:
 before_script:
   # Required for running a test
   - pip install .[test]
-  - hash -r
 
 # command to run tests
 script:
