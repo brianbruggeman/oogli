@@ -68,7 +68,6 @@ def test_basic_load_example(options):
 
 
 def test_color_example(options):
-    '''Tests basic draw api and uses colors'''
     import oogli
     import numpy as np
     import time
@@ -93,24 +92,21 @@ def test_color_example(options):
         }
     '''
 
-    major, minor = (4, 1)
+    # Create a program from the shaders
+    #  Note: This will auto request an OpenGL context of 4.1
+    program = oogli.Program(v_shader, f_shader)
+    major, minor = program.version
     if not oogli.opengl_supported(major, minor):
         error_message = "OpenGL {major}.{minor} is not supported."
         pytest.skip(error_message.format(major=major, minor=minor))
 
-    # Create a program from the shaders
-    #  Note: This will auto request an OpenGL context of 4.1
-    program = oogli.Program(v_shader, f_shader)
-
     # Vertices for a 2D Triangle
     vertices = options['triangle']
-
-    # Setup window and screenshot pixels
     colors = options['colors']
 
     # Setup window and screenshot pixels
     width, height = options['width'], options['height']
-    with oogli.Window(title='Oogli|Test|Color Example',
+    with oogli.Window(title='Oogli',
                       width=width, height=height,
                       major=major, minor=minor,
                       focus=False, visible=False) as win:
@@ -229,21 +225,20 @@ def test_uniform_example(options):
 
     f_shader = '''
         #version 410
-        uniform vec3 color = vec3(1.0, 0.2, 0.2);
+        uniform vec3 color = vec3(1.0, 0.0, 0.0);
         out vec4 frag_color;
         void main () {
             frag_color = vec4(color, 1.0);
         }
     '''
 
-    major, minor = (4, 1)
-    if not oogli.opengl_supported(major, minor):
-        error_message = "OpenGL {major}.{minor} is not supported."
-        pytest.skip(error_message.format(major=major, minor=minor))
-
     # Create a program from the shaders
     #  Note: This will auto request an OpenGL context of 4.1
     program = oogli.Program(v_shader, f_shader)
+    major, minor = program.version
+    if not oogli.opengl_supported(major, minor):
+        error_message = "OpenGL {major}.{minor} is not supported."
+        pytest.skip(error_message.format(major=major, minor=minor))
 
     # Vertices for a 2D Triangle
     vertices = options['triangle']
@@ -251,7 +246,7 @@ def test_uniform_example(options):
 
     # Setup window and screenshot pixels
     width, height = options['width'], options['height']
-    with oogli.Window(title='Oogli|Test|Uniform Example',
+    with oogli.Window(title='Oogli',
                       width=width, height=height,
                       major=major, minor=minor,
                       focus=False, visible=False) as win:
@@ -262,7 +257,7 @@ def test_uniform_example(options):
         running = True
         start_time = time.time()
         while running:
-            # Render vertices
+            # Render triangle
             program.draw(vertices=vertices, color=color)
             count += 1
             if win.open is False:
