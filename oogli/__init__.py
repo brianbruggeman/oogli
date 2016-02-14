@@ -47,6 +47,7 @@ import numpy as np
 
 from .Program import Program
 from .Window import Window
+from .textures import Texture
 
 ###############################################################################
 __title__ = 'oogli'

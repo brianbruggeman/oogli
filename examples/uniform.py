@@ -5,7 +5,7 @@ from oogli import np
 from DebugWindow import DebugWindow as Window
 
 vshader = '''
-    #version 410
+    #version 150
     in vec2 vertices;
     void main () {
         gl_Position = vec4(vertices, 0.0, 1.0);
@@ -13,7 +13,7 @@ vshader = '''
 '''
 
 fshader = '''
-    #version 410
+    #version 150
     uniform vec3 color = vec3(1.0, 0.0, 0.0);
     out vec4 frag_color;
     void main () {

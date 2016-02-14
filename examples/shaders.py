@@ -16,7 +16,7 @@ from glfw import gl
 # ######################################################################
 title = 'OpenGL 4.1 Rendering'
 width, height = 100, 75
-major, minor = (4, 1)
+major, minor = (3, 2)
 draw_array = False
 use_data = True
 
@@ -86,7 +86,7 @@ data['position'] = vertices
 data['color'] = colors
 
 vshader = '''
-    #version 410
+    #version 150
 
     in vec2 position;
     in vec3 color;
@@ -99,7 +99,7 @@ vshader = '''
     '''
 
 fshader = '''
-    #version 410
+    #version 150
 
     in vec3 v_color;
     out vec4 frag_colour;

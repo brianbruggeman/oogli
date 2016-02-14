@@ -267,7 +267,7 @@ class Window(object):
     @glfw.decorators.error_callback
     def on_error(code, message):
         '''Handles an error callback event'''
-        error_message = Window.ffi_string(message)
+        error_message = glfw.ffi_string(message)
         message = '{}: {}'.format(code, error_message)
         log.error(message)
 

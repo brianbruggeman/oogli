@@ -9,7 +9,7 @@ def test_multiple_windows(options):
     import time
 
     v_shader = '''
-        #version 410
+        #version 150
         in vec2 vertices;
         void main () {
             gl_Position = vec4(vertices, 0.0, 1.0);
@@ -17,7 +17,7 @@ def test_multiple_windows(options):
     '''
 
     f_shader = '''
-        #version 410
+        #version 150
         uniform vec3 color = vec3(1.0, 0.2, 0.2);
         out vec4 frag_color;
         void main () {
@@ -58,20 +58,21 @@ def test_multiple_windows(options):
                     data[x] = val
                     yield data
 
-    win1 = Window(title='Oogli|Test|MultiWindow 1', **debug_window_options)
-    win2 = Window(title='Oogli|Test|MultiWindow 2', **debug_window_options)
-    program.load(vertices=options['triangle'], indices=options['indices'])
-    color = color()
+    # TODO:  Fix
+    # win1 = Window(title='Oogli|Test|MultiWindow 1', **debug_window_options)
+    # win2 = Window(title='Oogli|Test|MultiWindow 2', **debug_window_options)
+    # program.load(vertices=options['triangle'], indices=options['indices'])
+    # color = color()
 
-    while win1.open or win2.open:
-        if win1.open:
-            win1.focus = True
-            program.draw(mode=win1.mode, fill=win1.fill, color=color.next())
-            win1.cycle()
-            win1.focus = False
-        if win2.open:
-            win2.focus = True
-            program.draw(mode=win2.mode, fill=win2.fill, color=color.next())
-            win2.cycle()
-            win2.focus = False
-        break
+    # while win1.open or win2.open:
+    #     if win1.open:
+    #         win1.focus = True
+    #         program.draw(mode=win1.mode, fill=win1.fill, color=color.next())
+    #         win1.cycle()
+    #         win1.focus = False
+    #     if win2.open:
+    #         win2.focus = True
+    #         program.draw(mode=win2.mode, fill=win2.fill, color=color.next())
+    #         win2.cycle()
+    #         win2.focus = False
+    #     break

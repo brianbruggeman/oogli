@@ -107,6 +107,13 @@ class Shader(object):
     def parse(self, source):
         '''Parses source looking for context required as well as
         inputs and uniforms'''
+        opengl_mapping = {
+            (1, 1): (2, 0),
+            (1, 2): (2, 1),
+            (1, 3): (3, 0),
+            (1, 4): (3, 1),
+            (1, 5): (3, 2),
+        }
         version_pattern = r'^\#version\s+(?P<version>[0-9]+)\s*$'
         inputs2_pattern = ("\s*GLSL_TYPE\s+"
                            "((highp|mediump|lowp)\s+)?"
@@ -137,7 +144,8 @@ class Shader(object):
             line = line.strip()
             if version_eng.search(line):
                 data = [m.groupdict() for m in version_eng.finditer(line)][0]
-                self.version = tuple([int(c) for c in data['version']][:2])
+                version = tuple([int(c) for c in data['version']][:2])
+                self.version = opengl_mapping.get(version, version)
             for eng in engines:
                 if eng.search(line):
                     data = [m.groupdict() for m in eng.finditer(line)][0]

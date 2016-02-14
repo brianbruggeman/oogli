@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import oogli
 from oogli import np
 from DebugWindow import DebugWindow as Window
@@ -34,10 +36,13 @@ width, height = (100, 100)
 with Window('Oogli', width=width, height=height) as win:
     # Main Loop
     program.load(vertices=triangle)
-    while win.open is True:
-        # Render triangle
-        program.draw()
-        pixels = oogli.screenshot(win)
-        win.cycle()
+    t = oogli.Texture('brick.png')
+    print(t)
 
-print('Checksum: {}'.format(np.sum(pixels)))
+    # while win.open is True:
+    #     # Render triangle
+    #     program.draw()
+    #     pixels = oogli.screenshot(win)
+    #     win.cycle()
+
+# print('Checksum: {}'.format(np.sum(pixels)))

@@ -10,7 +10,7 @@ def test_basic_example(options):
     import oogli
 
     v_shader = '''
-        #version 410
+        #version 150
         in vec2 vertices;
         void main () {
             gl_Position = vec4(vertices, 0.0, 1.0);
@@ -18,7 +18,7 @@ def test_basic_example(options):
     '''
 
     f_shader = '''
-        #version 410
+        #version 150
         uniform vec3 color = vec3(1.0, 0.2, 0.2);
         out vec4 frag_color;
         void main () {
@@ -26,7 +26,7 @@ def test_basic_example(options):
         }
     '''
 
-    major, minor = (4, 1)
+    major, minor = (3, 2)
     if not oogli.opengl_supported(major, minor):
         error_message = "OpenGL {major}.{minor} is not supported."
         pytest.skip(error_message.format(major=major, minor=minor))
