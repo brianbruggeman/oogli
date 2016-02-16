@@ -104,11 +104,12 @@ class Window(object):
 
     def __del__(self):
         '''Removes the glfw window'''
-        glfw.core.set_window_should_close(self.win, gl.TRUE)
-        # Wait for loop to end
-        self.lock.acquire()
-        glfw.core.destroy_window(self.win)
-        self.lock.release()
+        if hasattr(self, 'win'):
+            glfw.core.set_window_should_close(self.win, gl.TRUE)
+            # Wait for loop to end
+            self.lock.acquire()
+            glfw.core.destroy_window(self.win)
+            self.lock.release()
 
     def get_opengl_version(self, major=None, minor=None):
         '''Contains logic to determine opengl version.
@@ -118,7 +119,8 @@ class Window(object):
         # Determine available major/minor compatibility
         #  This contains init and terminate logic for glfw, so it must be run first
         ffi = glfw._ffi
-        opengl_version = None
+        opengl_version = (gl.get_integerv(gl.MAJOR_VERSION), gl.get_integerv(gl.MINOR_VERSION))
+        print('Current context: {}.{}'.format(opengl_version[0], opengl_version[1]))
         versions = [
             (4, 5), (4, 4), (4, 3), (4, 2), (4, 1), (4, 0),
             (3, 3), (3, 2), (3, 1), (3, 0),
@@ -127,9 +129,12 @@ class Window(object):
         ]
         if major or minor:
             if major:
-                versions = [(M, m) for M, m in versions if M == major]
+                versions = [(M, m) for M, m in versions if M >= major]
             if minor:
-                versions = [(M, m) for M, m in versions if m == minor]
+                versions = [(M, m) for M, m in versions if m >= minor]
+        print('Major: {}'.format(major))
+        print('Minor: {}'.format(minor))
+        print('Versions: {}'.format(versions))
         farg = ffi.new('char []', bytes(''.encode('utf-8')))
         title = farg
 
@@ -142,13 +147,14 @@ class Window(object):
                 glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, major)
                 glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, minor)
                 glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
-                glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, gl.GL_TRUE)
+                if major >= 3 and minor in [0, 1]:
+                    glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, gl.GL_TRUE)
                 glfw.window_hint(glfw.VISIBLE, False)
                 glfw.window_hint(glfw.FOCUSED, False)
                 window = glfw.core.create_window(1, 1, title, ffi.NULL, ffi.NULL)
                 if window != ffi.NULL:
                     glfw.destroy_window(window)
-                    if opengl_version is None:
+                    if opengl_version is None or opengl_version == (0, 0):
                         opengl_version = (major, minor)
             except Exception as e:
                 import traceback as tb
@@ -156,6 +162,8 @@ class Window(object):
                     log.error(line)
 
         glfw.terminate()
+        if opengl_version is None or not opengl_version > (0, 0):
+            raise RuntimeError('Could not set opengl context to version: {}.{}'.format(major, minor))
         return opengl_version
 
     def init(self):

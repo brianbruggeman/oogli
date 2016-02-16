@@ -21,6 +21,7 @@ fshader = '''
 # Create a program from the shaders
 #  Note: This will auto request an OpenGL context of 4.1 for future windows
 program = oogli.Program(vshader, fshader)
+major, minor = program.version
 
 # Vertices for a 2D Triangle
 triangle = [
@@ -31,7 +32,7 @@ triangle = [
 
 width, height = (100, 100)
 
-with Window('Oogli', width=width, height=height) as win:
+with Window('Oogli', width=width, height=height, major=major, minor=minor) as win:
     # Main Loop
     program.load(vertices=triangle)
     while win.open is True:
