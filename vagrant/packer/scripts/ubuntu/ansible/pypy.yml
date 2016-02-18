@@ -1,0 +1,37 @@
+- name: Installing pypy
+  hosts: all
+  gather_facts: yes
+
+    - name: Update system package repository
+      sudo: true
+      command: "{{item}}"
+      with_items:
+        - apt-add-repository ppa:pypy/ubuntu/ppa
+        - apt-get update
+        - apt-get install build-essential libssl-dev
+
+    - name: Download pypy
+      command: "{{item}}"
+      with_items:
+        - apt-get install pypy pypy-dev
+
+    - name: Install pip for pypy
+      sudo: true
+      command: "{{item}}"
+      with_items:
+
+    - name: Install packages for pypy
+      sudo: true
+      command: "{{item}}"
+      with_items:
+        - wget https://bootstrap.pypa.io/get-pip.py
+        - pypy get-pip.py
+        - pypy -m pip install git+https://bitbucket.org/pypy/numpy.git@pypy-4.0.1
+        - pypy -m pip install virtualenv virtualenvwrapper
+
+    - name: Cleanup
+      sudo: true
+      command: "{{item}}"
+      with_items:
+        - rm -Rf
+        - rm -f get-pip.py

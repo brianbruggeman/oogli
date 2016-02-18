@@ -1,0 +1,26 @@
+- name: Installing ZShell
+  hosts: all
+  gather_facts: yes
+
+  tasks:
+    - name: Prepare the system for ZShell install
+      sudo: true
+      command: "{{item}}"
+      tags: [packages]
+      with_items:
+        - apt-get update
+
+    - name: Install ZShell
+      command: "{{item}}"
+      tags: [install]
+      with_items:
+        - apt-get install -qq zsh
+        - apt-get install -qq git-core
+
+    - name: Install oh-my-zsh
+      command: "{{item}}"
+      tags: [install]
+      sudo: true
+      with_items:
+        - wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh
+        - chsh -s `which zsh`

@@ -1,0 +1,13 @@
+
+# DevOps
+- include: zsh.yml
+- include: tmux.yml
+- include: mosh.yml
+
+# Python
+- include: python2.yml
+- include: python3.yml
+- include: pypy.yml
+
+# UI
+- include: glfw3.yml

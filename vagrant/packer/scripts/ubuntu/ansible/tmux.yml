@@ -1,0 +1,42 @@
+- name: Installing tmux
+  hosts: all
+  gather_facts: yes
+
+  vars:
+    - tmux_version: "{{ ansible_env.TMUX_VERSION | default('2.1') }}"
+
+  tasks:
+    - name: Prepare the system for tmux install
+      sudo: true
+      command: "{{item}}"
+      tags: [packages]
+      with_items:
+        - apt-get update
+        - apt-get install -qq exuberant-ctags cmake libevent-dev libncurses5-dev
+        - apt-get install -qq gcc
+
+    - name: Download and build tmux
+      command: "{{item}}"
+      tags: [build]
+      sudo: true
+      with_items:
+        - "wget https://github.com/tmux/tmux/releases/download/{{ tmux_version }}/tmux-{{ tmux_version }}.tar.gz"
+        - "rm -Rf tmux-{{ tmux_version }}"
+        - "tar xfz tmux-{{ tmux_version }}.tar.gz"
+
+    - name: Install tmux
+      command: "{{item}} chdir=tmux-{{ tmux_version }}"
+      tags: [install]
+      sudo: true
+      with_items:
+        - ./configure
+        - make
+        - make install
+
+    - name: Install tmuxinator
+      command: "{{item}}"
+      tags: [post-install]
+      sudo: true
+      with_items:
+        - apt-get install -qq ruby
+        - gem install tmuxinator

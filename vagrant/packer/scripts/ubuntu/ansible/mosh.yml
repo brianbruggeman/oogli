@@ -1,0 +1,23 @@
+- name: Installing Mosh
+  hosts: all
+  gather_facts: yes
+
+    - name: Prepare system
+      sudo: true
+      command: "{{item}}"
+      with_items:
+        - apt-get install -qq python-software-properties
+        - add-apt-repository ppa:keithw/mosh
+        - apt-get update
+
+    - name: Install Mosh package
+      sudo: true
+      command: "{{item}}"
+      with_items:
+        - apt-get install -qq mosh
+
+    - name: Post-install configuration
+      sudo: true
+      command: "{{item}}"
+      with_items:
+        - iptables -I INPUT 1 -p udp --dport 60000:61000 -j ACCEPT
