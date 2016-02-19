@@ -1,24 +1,5 @@
 {
-  "variables": {
-    "aws_access_key": "{{env `AWS_KEY`}}",
-    "aws_secret_key": "{{env `AWS_SECRET`}}",
-    "aws_username": "{{env `AWS_USERNAME`}}"
-  },
   "builders": [{
-        "type": "amazon-ebs",
-        "access_key": "{{user `aws_access_key`}}",
-        "secret_key": "{{user `aws_secret_key`}}",
-        "region": "us-west-2",
-        "availability_zone": "us-west-2c",
-        "source_ami": "ami-495b7079",
-        "subnet_id": "subnet-799edf12",
-        "instance_type": "t2.medium",
-        "ssh_username": "ubuntu",
-        "associate_public_ip_address": true,
-        "security_group_ids": ["sg-d0fee2b2", "sg-66070d04", "sg-c329bda6", "sg-5af20335"],
-        "ami_name": "Ubuntu-14.04 {{timestamp}}"
-      },
-      {
       "boot_command": [
         "<esc><wait>",
         "<esc><wait>",
@@ -140,7 +121,7 @@
     },
     {
       "environment_vars": [
-        "HOME_DIR=/home/{{user `aws_username`}}",
+        "HOME_DIR=/home/vagrant",
         "http_proxy={{user `http_proxy`}}",
         "https_proxy={{user `https_proxy`}}",
         "no_proxy={{user `no_proxy`}}"
@@ -158,12 +139,21 @@
       "type": "shell"
     },
     {
+      "type": "file",
+      "source": "./scripts/ubuntu/ansible/",
+      "destination": "/tmp/packer-provisioner-ansible-local"
+    },
+    {
       "type": "ansible-local",
-      "playbook_file": "scripts/ubuntu/ansible/main.yml"
+      "command": "ansible-playbook -vvv",
+      "playbook_file": "scripts/ubuntu/ansible/main.yml",
+      "playbook_paths": [
+        "scripts/ubuntu/ansible"
+      ]
     },
     {
       "environment_vars": [
-        "HOME_DIR=/home/{{user `aws_username`}}",
+        "HOME_DIR=/home/vagrant",
         "http_proxy={{user `http_proxy`}}",
         "https_proxy={{user `https_proxy`}}",
         "no_proxy={{user `no_proxy`}}"

@@ -1,40 +1,25 @@
 - name: Installing python 2
   hosts: all
-  gather_facts: yes
+  become: yes
+  become_method: sudo
+
+  tasks:
+    - name: Install pips packages
+      pip: "name={{item}} state=forcereinstall"
+      with_items:
+        - virtualenv
+        - virtualenvwrapper
 
     - name: Update system package repository
-      sudo: true
       apt_repository: "repo={{item}} update_cache=yes state=present"
       with_items:
         - ppa:fkrull/deadsnakes-python2.7
 
-    - name: Install Ubuntu packages and datapipe dependencies
-      sudo: true
-      apt: "name={{item}} state=present update_cache=true"
+    - name: Install Python
+      apt: "name={{item}} state=present"
       with_items:
-        - build-essential
-        - checkinstall
-        - git
-        - git-dev
-        - libbz2-dev
-        - libc6-dev
-        - libffi-dev
-        - libgdbm-dev
-        - libpq-dev
-        - libreadline-gplv2-dev
-        - libsqlite3-dev
-        - libssl-dev
+        - python
         - python-dev
         - python-pip
-        - python-software-properties
-        - software-properties-common
-        - tk-dev
+        - ansible
 
-    - name: Finalize package installation
-      sudo: true
-      command: "{{item}}"
-      when: packages_installed
-      with_items:
-        - pip install -U pip
-        - pip install -U virtualenv
-        - pip install -U virtualenvwrapper

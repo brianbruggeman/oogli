@@ -1,23 +1,20 @@
 - name: Installing Mosh
   hosts: all
-  gather_facts: yes
+  become: yes
+  become_method: sudo
 
-    - name: Prepare system
-      sudo: true
-      command: "{{item}}"
+  tasks:
+    - name: Update system package repository
+      apt_repository: "repo={{item}} update_cache=yes state=present"
       with_items:
-        - apt-get install -qq python-software-properties
-        - add-apt-repository ppa:keithw/mosh
-        - apt-get update
+        - ppa:keithw/mosh
 
-    - name: Install Mosh package
-      sudo: true
-      command: "{{item}}"
+    - name: Install Mosh
+      apt: "name={{item}} state=present"
       with_items:
-        - apt-get install -qq mosh
+        - mosh
 
     - name: Post-install configuration
-      sudo: true
       command: "{{item}}"
       with_items:
         - iptables -I INPUT 1 -p udp --dport 60000:61000 -j ACCEPT

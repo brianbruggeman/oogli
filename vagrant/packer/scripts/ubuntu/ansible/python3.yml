@@ -1,44 +1,18 @@
 - name: Installing python 3
   hosts: all
-  gather_facts: yes
+  become: yes
+  become_method: sudo
 
+  tasks:
     - name: Update system package repository
-      sudo: true
       apt_repository: "repo={{item}} update_cache=yes state=present"
       with_items:
         - ppa:fkrull/deadsnakes
 
-    - name: Install Ubuntu packages and datapipe dependencies
-      sudo: true
-      apt: "name={{item}} state=present update_cache=true"
+    - name: Install Python
+      apt: "name={{item}} state=present"
       with_items:
-        - build-essential
-        - checkinstall
-        - git
-        - libbz2-dev
-        - libc6-dev
-        - libffi-dev
-        - libgdbm-dev
-        - libncurses5-dev
-        - libncursesw5-dev
-        - libpq-dev
-        - libreadline-gplv2-dev
-        - libsqlite3-dev
-        - libssl-dev
-        - python-software-properties
         - python3.5
         - python3.5-dev
         - python3.5-gdbm
-        - software-properties-common
-        - tk-dev
-
-    - name: Finalize package installation
-      sudo: true
-      command: "{{item}}"
-      when: packages_installed
-      with_items:
-        - mv /usr/bin/python3 /usr/bin/python3.old
-        - ln -s /usr/bin/python3.5 /usr/bin/python3
-        - wget https://bootstrap.pypa.io/get-pip.py
-        - python3 get-pip.py
-        - python3 -m pip install -U pip
+        - python3.5-pip

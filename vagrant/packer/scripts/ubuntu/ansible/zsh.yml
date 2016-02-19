@@ -1,26 +1,35 @@
 - name: Installing ZShell
   hosts: all
-  gather_facts: yes
+  become: yes
+  become_method: sudo
 
   tasks:
-    - name: Prepare the system for ZShell install
-      sudo: true
-      command: "{{item}}"
-      tags: [packages]
+    - name: Update system package repository
+      apt_repository: "repo={{item}} update_cache=yes state=present"
       with_items:
-        - apt-get update
+        - ppa:keithw/mosh
 
     - name: Install ZShell
-      command: "{{item}}"
-      tags: [install]
+      apt: "name={{item}} state=present"
+      sudo: true
       with_items:
-        - apt-get install -qq zsh
-        - apt-get install -qq git-core
+        - wget
+        - zsh
+        - git
+        - git-core
 
     - name: Install oh-my-zsh
       command: "{{item}}"
-      tags: [install]
       sudo: true
       with_items:
-        - wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh
-        - chsh -s `which zsh`
+        - sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+
+    - name: Set ZShell as default shell
+      user: "name=vagrant shell=/usr/bin/zsh"
+      sudo: true
+
+    - name: Cleanup
+      command: "{{item}}"
+      sudo: true
+      with_items:
+        - rm install.sh
