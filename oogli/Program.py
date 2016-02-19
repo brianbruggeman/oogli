@@ -175,11 +175,12 @@ class Program(object):
                 self.buffer = data
 
             if isinstance(indices, list) and not indices:
-                self.indices = range(data_len)
+                indices = range(data_len)
             else:
-                self.indices = indices
-            if not isinstance(self.indices, np.ndarray):
-                self.indices = array(self.indices, vtype=np.uint32).flatten()
+                indices = indices
+            if not isinstance(indices, np.ndarray):
+                indices = array(indices, vtype=np.uint32).flatten()
+            self.indices = indices
 
             self.vao = gl.gen_vertex_arrays(1)
 
@@ -188,8 +189,10 @@ class Program(object):
 
             gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)
             gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-            gl.buffer_data(gl.ELEMENT_ARRAY_BUFFER, self.indices.flatten(), gl.GL_STATIC_DRAW)
-        return self.buffer
+            gl.buffer_data(gl.ELEMENT_ARRAY_BUFFER, indices.flatten(), gl.STATIC_DRAW)
+        if data == []:
+            data = self.buffer
+        return data
 
     def draw(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], **kwds):
         '''Converts list data into array data and binds numpy arrays to
@@ -220,13 +223,15 @@ class Program(object):
             offset_wrapped = ctypes.c_void_p(offset)
             gl.enable_vertex_attrib_array(loc)
             gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-            gl.vertex_attrib_pointer(loc, self.buffer[varname].shape[-1], gl.GL_FLOAT, False, stride, offset_wrapped)
+            gl.vertex_attrib_pointer(loc, self.buffer[varname].shape[-1], gl.FLOAT, False, stride, offset_wrapped)
         for varname, binder in self.uniforms.items():
             vardata = kwds.get(varname, getattr(self, varname, None))
             if vardata:
                 binder(vardata)
-        gl.draw_elements(mode or self.mode, len(self.indices), gl.GL_UNSIGNED_INT, None)
-        gl.glDisableVertexAttribArray(self.vao)
+        mode = mode or self.mode
+        indices = indices or self.indices
+        gl.draw_elements(mode, len(indices), gl.UNSIGNED_INT, None)
+        gl.disable_vertex_attrib_array(self.vao)
         return self.buffer
 
     def __repr__(self):
