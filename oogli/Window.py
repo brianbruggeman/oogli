@@ -120,7 +120,6 @@ class Window(object):
         #  This contains init and terminate logic for glfw, so it must be run first
         ffi = glfw._ffi
         opengl_version = (gl.get_integerv(gl.MAJOR_VERSION), gl.get_integerv(gl.MINOR_VERSION))
-        print('Current context: {}.{}'.format(opengl_version[0], opengl_version[1]))
         versions = [
             (4, 5), (4, 4), (4, 3), (4, 2), (4, 1), (4, 0),
             (3, 3), (3, 2), (3, 1), (3, 0),
@@ -132,9 +131,6 @@ class Window(object):
                 versions = [(M, m) for M, m in versions if M >= major]
             if minor:
                 versions = [(M, m) for M, m in versions if m >= minor]
-        print('Major: {}'.format(major))
-        print('Minor: {}'.format(minor))
-        print('Versions: {}'.format(versions))
         farg = ffi.new('char []', bytes(''.encode('utf-8')))
         title = farg
 
