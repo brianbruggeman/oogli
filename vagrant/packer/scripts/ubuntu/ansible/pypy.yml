@@ -18,7 +18,7 @@
         - pypy-dev
 
     - name: Install pips packages
-      pip: "name={{item}} executable=pip-pypy state=forcereinstall"
+      pip: "name={{item}} executable=pip-pypy"
       with_items:
         - virtualenv
         - virtualenvwrapper

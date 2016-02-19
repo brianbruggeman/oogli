@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import ctypes
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
+
+Buffer = namedtuple('Buffer', ['id', 'data'])
 
 from glfw import gl
 import numpy as np
@@ -136,6 +138,56 @@ class Program(object):
             self.uniforms[varname] = uniform_binder
         self.built = True
 
+    def setup(self, indices=[], data=[], **kwds):
+        if not self.built:
+            try:
+                self.build()
+            except RuntimeError as e:
+                print('Build failed: {}'.format(self))
+                for arg in e.args:
+                    print(arg)
+            self.built = True
+        if isinstance(data, Buffer) and isinstance(indices, Buffer):
+            return data, indices
+
+        if data and not isinstance(data, Buffer):
+            if isinstance(data, (tuple, list)):
+                data = np.array(data, dtype='f')
+
+        data_len = len(data)
+        if data_len == 0:
+            interleaved = OrderedDict()
+            for key in self.inputs.keys() + self.uniforms.keys():
+                if key in kwds:
+                    val = kwds[key]
+                    if key in self.uniforms:
+                        setattr(self, key, val)
+                    else:
+                        interleaved[key] = val if isinstance(val, np.ndarray) else array(val)
+                        data_len = len(interleaved[key])
+                        setattr(self.vert, key, val)
+            data_buffer = np.zeros(
+                data_len,
+                dtype=[(k, v.dtype, v.shape[-1]) for k, v in interleaved.items()]
+            )
+            for key, val in interleaved.items():
+                data_buffer[key] = val
+            data = data_buffer
+
+        if isinstance(indices, list) and not indices:
+            indices = range(data_len)
+        if not isinstance(indices, np.ndarray):
+            indices = array(indices, vtype=np.uint32)
+        indices = indices.flatten()
+
+        data_id = gl.gen_buffers(1)
+        indices_id = gl.gen_buffers(1)
+
+        gl.bind_buffer(gl.ARRAY_BUFFER, data_id)
+        gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, indices_id)
+        gl.buffer_data(gl.ELEMENT_ARRAY_BUFFER, indices.nbytes, indices.flatten(), gl.STATIC_DRAW)
+        return Buffer(data_id, data), Buffer(indices_id, indices)
+
     def load(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], bits=None, **kwds):
         if not self.built:
             try:
@@ -145,71 +197,41 @@ class Program(object):
                 for arg in e.args:
                     print(arg)
             self.built = True
+        if not isinstance(indices, np.ndarray) or not isinstance(data, np.ndarray):
+            self.loaded = False
         if not self.loaded:
             self.loaded = True
             self.bits = bits or (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
             self.mode = mode
             self.fill = fill
 
-            if data and not isinstance(data, np.ndarray):
-                data = np.array(data, dtype='f')
-            data_len = len(data)
-            if data_len == 0:
-                interleaved = OrderedDict()
-                for key in self.inputs.keys() + self.uniforms.keys():
-                    if key in kwds:
-                        val = kwds[key]
-                        if key in self.uniforms:
-                            setattr(self, key, val)
-                        else:
-                            interleaved[key] = val if isinstance(val, np.ndarray) else array(val)
-                            data_len = len(interleaved[key])
-                            setattr(self.vert, key, val)
-                self.buffer = np.zeros(
-                    data_len,
-                    dtype=[(k, v.dtype, v.shape[-1]) for k, v in interleaved.items()]
-                )
-                for key, val in interleaved.items():
-                    self.buffer[key] = val
-            elif not hasattr(self, 'buffer'):
-                self.buffer = data
-
-            if isinstance(indices, list) and not indices:
-                indices = range(data_len)
-            else:
-                indices = indices
-            if not isinstance(indices, np.ndarray):
-                indices = array(indices, vtype=np.uint32).flatten()
-            self.indices = indices
-
             self.vao = gl.gen_vertex_arrays(1)
 
-            self.buffer_id = gl.gen_buffers(1)
-            self.indices_id = gl.gen_buffers(1)
+            data, indices = self.setup(indices=indices, data=data, **kwds)
+            self.buffer = data
+            self.indices = indices
 
-            gl.bind_buffer(gl.ARRAY_BUFFER, self.buffer_id)
-            gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-            gl.buffer_data(gl.ELEMENT_ARRAY_BUFFER, indices.flatten(), gl.STATIC_DRAW)
-        if data == []:
+        if isinstance(indices, list) and indices == []:
+            indices = self.indices
+        if isinstance(data, list) and data == []:
             data = self.buffer
-        return data
+        return data, indices
 
     def draw(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], **kwds):
         '''Converts list data into array data and binds numpy arrays to
         vertex shader inputs.'''
         if isinstance(data, list) and data or isinstance(indices, list) and indices:
             self.loaded = False
-        self.load(mode=mode, fill=fill, indices=indices, data=data, **kwds)
+        data, indices = self.load(mode=mode, fill=fill, indices=indices, data=data, **kwds)
         # Setup for drawing
-        gl.clear(self.bits)
         gl.polygon_mode(gl.FRONT_AND_BACK, fill or self.fill)
         gl.enable(gl.DEPTH_TEST)
         # gl.depth_func(gl.LESS)
         gl.use_program(self.program)
 
         gl.bind_vertex_array(self.vao)
-        gl.buffer_data(gl.ARRAY_BUFFER, self.buffer.nbytes, self.buffer, gl.DYNAMIC_DRAW)
-        stride = self.buffer.strides[0]
+        gl.buffer_data(gl.ARRAY_BUFFER, data.data.nbytes, data.data, gl.DYNAMIC_DRAW)
+        stride = data.data.strides[0]
 
         last_varname = None
         for varindex, vardata in enumerate(self.inputs.items()):
@@ -218,21 +240,21 @@ class Program(object):
                 offset = None
                 last_varname = varname
             else:
-                offset = self.buffer.dtype[last_varname].itemsize
+                offset = data.data.dtype[last_varname].itemsize
             loc = gl.glGetAttribLocation(self.program, varname)
             offset_wrapped = ctypes.c_void_p(offset)
             gl.enable_vertex_attrib_array(loc)
-            gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, self.indices_id)
-            gl.vertex_attrib_pointer(loc, self.buffer[varname].shape[-1], gl.FLOAT, False, stride, offset_wrapped)
+            gl.bind_buffer(gl.ELEMENT_ARRAY_BUFFER, indices.id)
+            gl.vertex_attrib_pointer(loc, data.data[varname].shape[-1], gl.FLOAT, False, stride, offset_wrapped)
         for varname, binder in self.uniforms.items():
             vardata = kwds.get(varname, getattr(self, varname, None))
             if vardata:
                 binder(vardata)
         mode = mode or self.mode
-        indices = indices or self.indices
-        gl.draw_elements(mode, len(indices), gl.UNSIGNED_INT, None)
-        gl.disable_vertex_attrib_array(self.vao)
-        return self.buffer
+        index_count = len(indices.data)
+        gl.draw_elements(mode, index_count, gl.UNSIGNED_INT, None)
+        # gl.disable_vertex_attrib_array(self.vao)
+        return data, indices
 
     def __repr__(self):
         cname = self.__class__.__name__

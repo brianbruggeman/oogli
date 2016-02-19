@@ -5,7 +5,7 @@
 
   tasks:
     - name: Install pips packages
-      pip: "name={{item}} state=forcereinstall"
+      pip: "name={{item}}"
       with_items:
         - virtualenv
         - virtualenvwrapper
