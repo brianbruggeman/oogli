@@ -29,7 +29,7 @@ class Window(object):
     def clear(self):
         '''Clears the window'''
         black_background_color = [0.0, 0.0, 0.0, 1.0]
-        gl.clear_color(black_background_color)
+        gl.clear_color(*black_background_color)
         gl.clear(gl.COLOR_BUFFER_BIT)
         if self.open:
             self.cycle()
