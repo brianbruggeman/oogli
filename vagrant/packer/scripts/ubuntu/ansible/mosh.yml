@@ -1,0 +1,20 @@
+- name: Installing Mosh
+  hosts: all
+  become: yes
+  become_method: sudo
+
+  tasks:
+    - name: Update system package repository
+      apt_repository: "repo={{item}} update_cache=yes state=present"
+      with_items:
+        - ppa:keithw/mosh
+
+    - name: Install Mosh
+      apt: "name={{item}} state=present"
+      with_items:
+        - mosh
+
+    - name: Post-install configuration
+      command: "{{item}}"
+      with_items:
+        - iptables -I INPUT 1 -p udp --dport 60000:61000 -j ACCEPT

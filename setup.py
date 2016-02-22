@@ -82,6 +82,7 @@ install_requires = [
     'cffi',
     'glfw-cffi',
     'numpy',
+    'pillow',
 ]
 
 tests_require = [

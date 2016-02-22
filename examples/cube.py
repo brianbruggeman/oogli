@@ -5,7 +5,7 @@ from oogli import np
 from DebugWindow import DebugWindow as Window
 
 vshader = '''
-    #version 410
+    #version 150
     uniform mat4 mvp = mat4(vec4(1.0, 0.0, 0.0, 0.0), vec4(0.0, 1.0, 0.0, 0.0), vec4(0.0, 0.0, 1.0, 0.0), vec4(0.0, 0.0, 0.0, 1.0));
     in vec3 vertices;
     in vec3 colors;
@@ -17,7 +17,7 @@ vshader = '''
 '''
 
 fshader = '''
-    #version 410
+    #version 150
     in vec3 v_colors;
     out vec4 frag_color;
     void main () {

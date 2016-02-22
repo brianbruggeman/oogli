@@ -79,7 +79,7 @@ This is the required code to produce a shaded triangle using oogli:
     import oogli
 
     v_shader = '''
-        #version 410
+        #version 150
         in vec2 vertices;
         void main () {
             gl_Position = vec4(vertices, 0.0, 1.0);
@@ -87,7 +87,7 @@ This is the required code to produce a shaded triangle using oogli:
     '''
 
     f_shader = '''
-        #version 410
+        #version 150
         out vec4 frag_color;
         void main () {
             frag_colour = vec4(0.3, 1.0, 0.3, 1.0);

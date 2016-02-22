@@ -1,0 +1,53 @@
+- name: Installing GLFW3
+  hosts: all
+  become: yes
+  become_method: sudo
+
+  vars:
+    - glfw_version: "{{ ansible_env.TMUX_VERSION | default('3.1.2') }}"
+
+  tasks:
+    - name: Prepare system
+      apt: "name={{item}} update_cache=yes state=present"
+      with_items:
+        - cmake
+        - freeglut3-dev
+        - g++-4.8
+        - gcc-4.8
+        - libfreetype6-dev
+        - libglew-dev
+        - libglu1-mesa-dev
+        - libjpeg8-dev
+        - libxcursor-dev
+        - libxinerama-dev
+        - libxrandr-dev
+        - libxrandr-dev
+        - libxxf86vm-dev
+
+    - name: Download and unpack glfw source
+      command: "{{item}}"
+      with_items:
+        - "wget -O glfw-{{ glfw_version }}.zip https://github.com/glfw/glfw/releases/download/{{ glfw_version }}/glfw-{{ glfw_version }}.zip"
+        - "unzip glfw-{{ glfw_version }}.zip"
+
+    - name: Build glfw package
+      command: "{{item}} chdir=glfw-{{ glfw_version }}"
+      with_items:
+        - cmake -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=/x86_64-linux-gnu
+        - make
+
+    - name: Install glfw
+      command: "{{item}} chdir=glfw-{{ glfw_version }}"
+      with_items:
+        - make install
+
+    - name: Post-install configuration
+      command: "{{item}}"
+      with_items:
+        - "export DISPLAY=:99.0"
+        - "sh -e /etc/init.d/xvfb start"
+
+    - name: Cleanup
+      command: "{{item}}"
+      with_items:
+        - "rm -Rf glfw-{{ glfw_version }}*"

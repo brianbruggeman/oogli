@@ -1,0 +1,25 @@
+- name: Installing python 2
+  hosts: all
+  become: yes
+  become_method: sudo
+
+  tasks:
+    - name: Install pips packages
+      pip: "name={{item}}"
+      with_items:
+        - virtualenv
+        - virtualenvwrapper
+
+    - name: Update system package repository
+      apt_repository: "repo={{item}} update_cache=yes state=present"
+      with_items:
+        - ppa:fkrull/deadsnakes-python2.7
+
+    - name: Install Python
+      apt: "name={{item}} state=present"
+      with_items:
+        - python
+        - python-dev
+        - python-pip
+        - ansible
+

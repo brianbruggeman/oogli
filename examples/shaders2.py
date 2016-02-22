@@ -2,7 +2,7 @@ import oogli
 from DebugWindow import DebugWindow as Window
 
 vshader = '''
-    #version 410
+    #version 150
     in vec3 vertices;
     in vec3 colors;
     out vec3 vcolors;
@@ -13,7 +13,7 @@ vshader = '''
 '''
 
 fshader = '''
-    #version 410
+    #version 150
     uniform vec3 colored = vec3(0.2, 1.0, 0.2);
     in vec3 vcolors;
     out vec4 frag_color;

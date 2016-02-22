@@ -1,0 +1,24 @@
+- name: Installing pypy
+  hosts: all
+  become: yes
+  become_method: sudo
+
+  tasks:
+    - name: Update system package repository
+      apt_repository: "repo={{item}} update_cache=yes state=present"
+      with_items:
+        - ppa:pypy/ubuntu/ppa
+
+    - name: Install Pypy
+      apt: "name={{item}} state=present"
+      with_items:
+        - build-essential
+        - libssl-dev
+        - pypy
+        - pypy-dev
+
+    - name: Install pips packages
+      pip: "name={{item}} executable=pip-pypy"
+      with_items:
+        - virtualenv
+        - virtualenvwrapper

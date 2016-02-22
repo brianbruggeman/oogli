@@ -1,0 +1,16 @@
+- name: Main Playbook for Ubuntu 14.04
+  hosts: all
+
+
+  # Python
+- include: python2.yml
+# - include: python3.yml
+# - include: pypy.yml
+
+#   # UI
+# - include: glfw3.yml
+
+# DevOps
+- include: tmux.yml
+- include: mosh.yml
+- include: zsh.yml

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import oogli
 from oogli import np
 from DebugWindow import DebugWindow as Window
@@ -21,7 +23,6 @@ fshader = '''
 # Create a program from the shaders
 #  Note: This will auto request an OpenGL context of 4.1 for future windows
 program = oogli.Program(vshader, fshader)
-major, minor = program.version
 
 # Vertices for a 2D Triangle
 triangle = [
@@ -32,13 +33,16 @@ triangle = [
 
 width, height = (100, 100)
 
-with Window('Oogli', width=width, height=height, major=major, minor=minor) as win:
+with Window('Oogli', width=width, height=height) as win:
     # Main Loop
     program.load(vertices=triangle)
-    while win.open is True:
-        # Render triangle
-        program.draw()
-        pixels = oogli.screenshot(win)
-        win.cycle()
+    t = oogli.Texture('brick.png')
+    print(t)
 
-print('Checksum: {}'.format(np.sum(pixels)))
+    # while win.open is True:
+    #     # Render triangle
+    #     program.draw()
+    #     pixels = oogli.screenshot(win)
+    #     win.cycle()
+
+# print('Checksum: {}'.format(np.sum(pixels)))
