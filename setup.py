@@ -111,7 +111,7 @@ setup(
         'Topic :: Software Development :: User Interfaces',
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: Apache Software License',
         'License :: Other/Proprietary License',
         'Operating System :: OS Independent',
@@ -123,6 +123,7 @@ setup(
     install_requires=install_requires,
     setup_requires=['pytest-runner'],
     extras_require={
+        'tests': tests_require,
     },
     tests_require=tests_require,
     test_suite='{}.test'.format(package_name),

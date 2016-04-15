@@ -1,6 +1,6 @@
 import glfw
-from glfw import gl
 import numpy as np
+from glfw import gl
 
 
 def screenshot(win, pixels=None):

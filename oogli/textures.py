@@ -1,25 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
+
 import glfw
+import numpy as np
 from glfw import gl
 from PIL import Image
-import numpy as np
 
 
 class Texture(object):
 
-    def __init__(self, image_path, texture_type=None, min_filter=None, mag_filter=None, wrap_r=None, wrap_s=None, wrap_t=None):
+    def __init__(self, image_path, type=None, filter=None, wrap=None):
+        '''Creates a texture'''
         assert glfw.core.init(), 'Error: GLFW could not be initialized'
         self.image_path = image_path
+        if not os.path.exists(image_path):
+            raise IOError('Could not find image: {}'.format(image_path))
         texture_types = [gl.TEXTURE_1D, gl.TEXTURE_2D, gl.TEXTURE_3D]
-        if texture_type not in texture_types:
-            texture_type = gl.TEXTURE_2D
-        self.texture_type = texture_type
-        self.wrap_r = gl.REPEAT if wrap_r is None else wrap_r
-        self.wrap_s = gl.REPEAT if wrap_s is None else wrap_s
-        self.wrap_t = gl.REPEAT if wrap_t is None else wrap_t
-        self.min_filter = gl.NEAREST if min_filter is None else min_filter
-        self.mag_filter = gl.NEAREST if mag_filter is None else mag_filter
+        self.texture_type = gl.TEXTURE_2D if type not in texture_types else type
+        if filter is None:
+            filter = gl.NEAREST
+        if wrap is None:
+            wrap = gl.REPEAT
+        self.wrap_r = wrap
+        self.wrap_s = wrap
+        self.wrap_t = wrap
+        self.min_filter = filter
+        self.mag_filter = filter
         self.size = None
 
     @property
@@ -35,7 +42,13 @@ class Texture(object):
             with Image.open(self.image_path) as image:
                 image_data = np.array(list(image.getdata()), np.uint8)
                 self.size = width, height = image.width, image.height
-                gl.tex_image_2d(self.texture_type, 0, gl.RGB, width, height, 0, gl.RGB, gl.FLOAT, image_data)
+                mapping = {
+                    gl.TEXTURE_1D: gl.tex_image_1d,
+                    gl.TEXTURE_2D: gl.tex_image_2d,
+                    gl.TEXTURE_3D: gl.tex_image_3d
+                }
+                func = mapping[self.texture_type]
+                func(self.texture_type, 0, gl.RGB, width, height, 0, gl.RGB, gl.FLOAT, image_data)
         return self._id
 
     def __repr__(self):

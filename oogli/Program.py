@@ -5,8 +5,8 @@ from collections import OrderedDict, namedtuple
 
 Buffer = namedtuple('Buffer', ['id', 'data'])
 
-from glfw import gl
 import numpy as np
+from glfw import gl
 
 from .shaders import (
     Shader,
@@ -58,6 +58,7 @@ class Program(object):
 
     @property
     def program(self):
+        '''Easy access to OpenGL's program id'''
         if not hasattr(self, '_program'):
             self._program = gl.create_program()
             self.created = True
@@ -70,6 +71,7 @@ class Program(object):
         self.vert[key] = val
 
     def attach(self, shader):
+        '''Attaches shaders to program'''
         error_message = 'Attach expects a Shader object, not {}'.format(type(shader))
         assert isinstance(shader, Shader), error_message
         if isinstance(shader, VertexShader):
@@ -86,6 +88,7 @@ class Program(object):
         shader.attach(self)
 
     def build(self):
+        '''Compiles and links shaders into program'''
         shaders = [
             shader
             for shader in (self.vert, self.frag, self.tc, self.te, self.geo)
@@ -139,6 +142,7 @@ class Program(object):
         self.built = True
 
     def setup(self, indices=[], data=[], **kwds):
+        '''Interleaves data'''
         if not self.built:
             try:
                 self.build()
@@ -189,6 +193,7 @@ class Program(object):
         return Buffer(data_id, data), Buffer(indices_id, indices)
 
     def load(self, mode=gl.TRIANGLES, fill=gl.LINE, indices=[], data=[], bits=None, **kwds):
+        '''Loads data and sets up program'''
         if not self.built:
             try:
                 self.build()

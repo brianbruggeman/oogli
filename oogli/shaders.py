@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from collections import OrderedDict
 import re
+from collections import OrderedDict
 from textwrap import dedent as dd
 
 import glfw

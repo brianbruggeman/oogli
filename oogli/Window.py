@@ -126,11 +126,11 @@ class Window(object):
             (2, 1), (2, 0),
             (1, 5), (1, 4), (1, 3), (1, 2), (1, 1), (1, 0),
         ]
-        if major or minor:
-            if major:
-                versions = [(M, m) for M, m in versions if M >= major]
-            if minor:
-                versions = [(M, m) for M, m in versions if m >= minor]
+        if major and minor:
+            ver = (major, minor)
+            vindex = versions.index((major, minor))
+            versions.pop(vindex)
+            versions.insert(0, (major, minor))
         farg = ffi.new('char []', bytes(''.encode('utf-8')))
         title = farg
 
