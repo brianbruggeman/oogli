@@ -9,7 +9,7 @@ glfw-cffi==0.1.8
 mccabe==0.3.1
 numpy==1.10.4
 pep8==1.7.0
-py==1.4.31
+py==1.10.0
 pycparser==2.14
 pyflakes==1.0.0
 PyOpenGL==3.1.0
