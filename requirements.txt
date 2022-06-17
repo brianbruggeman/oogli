@@ -7,7 +7,7 @@ flake8==2.5.1
 freetype-py==1.0.2
 glfw-cffi==0.1.8
 mccabe==0.3.1
-numpy==1.10.4
+numpy==1.21.0
 pep8==1.7.0
 py==1.4.31
 pycparser==2.14
